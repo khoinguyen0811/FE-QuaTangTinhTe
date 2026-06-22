@@ -178,25 +178,75 @@
 				let option = optionParts
 					.join("/")
 					.normalize("NFC")
-					.replace(/^\s*pha lê cao cấp\s*[-–—]?\s*/i, "")
-					.replace(/^[\s\-–—/]+/, "")
 					.replace(/\s{2,}/g, " ")
 					.trim();
-				if (/^pha lê/i.test(option) && option.includes("-")) {
-					option = option.split("-").slice(1).join("-").trim();
-				}
 				return { size, option };
 			}
 
-			function variantButtonTemplate(item, index) {
-				const variantInfo = parseVariantTitle(item.title);
+			function uniqueVariantValues(key) {
+				const values = [];
+				product.variants.forEach((variant) => {
+					const value = parseVariantTitle(variant.title)[key];
+					if (value && !values.includes(value)) values.push(value);
+				});
+				return values;
+			}
+
+			function findVariantIndex(size, option) {
+				return product.variants.findIndex((variant) => {
+					const variantInfo = parseVariantTitle(variant.title);
+					return (!size || variantInfo.size === size) && (!option || variantInfo.option === option);
+				});
+			}
+
+			function targetIndexForSize(size) {
+				const activeInfo = parseVariantTitle(currentVariant().title);
+				const sameMaterialIndex = findVariantIndex(size, activeInfo.option);
+				if (sameMaterialIndex >= 0) return sameMaterialIndex;
+				const sizeIndex = findVariantIndex(size, "");
+				return sizeIndex >= 0 ? sizeIndex : activeVariantIndex;
+			}
+
+			function targetIndexForMaterial(option) {
+				const activeInfo = parseVariantTitle(currentVariant().title);
+				const sameSizeIndex = findVariantIndex(activeInfo.size, option);
+				if (sameSizeIndex >= 0) return sameSizeIndex;
+				const materialIndex = findVariantIndex("", option);
+				return materialIndex >= 0 ? materialIndex : activeVariantIndex;
+			}
+
+			function variantChoiceButton(label, isActive, targetIndex) {
 				return `
-					<button class="variant-button" type="button" aria-pressed="${index === activeVariantIndex}" data-variant-index="${index}">
-						<span class="variant-size">${variantInfo.size}</span>
-						${variantInfo.option ? `<span class="variant-option">${variantInfo.option}</span>` : ""}
-						<strong>${formatVND(item.price)}</strong>
-						<small>${item.sku}</small>
+					<button class="variant-choice" type="button" aria-pressed="${isActive}" data-variant-index="${targetIndex}">
+						${label}
 					</button>
+				`;
+			}
+
+			function variantPickerTemplate() {
+				const activeInfo = parseVariantTitle(currentVariant().title);
+				const sizeButtons = uniqueVariantValues("size")
+					.map((size) => variantChoiceButton(size, size === activeInfo.size, targetIndexForSize(size)))
+					.join("");
+				const materialButtons = uniqueVariantValues("option")
+					.map((option) => variantChoiceButton(option, option === activeInfo.option, targetIndexForMaterial(option)))
+					.join("");
+
+				return `
+					<div class="variant-list" id="variant-list">
+						<div class="variant-group">
+							<p class="variant-label">Kích thước: <strong>${activeInfo.size}</strong></p>
+							<div class="variant-options">${sizeButtons}</div>
+						</div>
+						${
+							materialButtons
+								? `<div class="variant-group">
+									<p class="variant-label">Chất liệu: <strong>${activeInfo.option}</strong></p>
+									<div class="variant-options">${materialButtons}</div>
+								</div>`
+								: ""
+						}
+					</div>
 				`;
 			}
 
@@ -272,25 +322,18 @@
 						<img id="main-product-image" src="${variant.imageUrl || product.imageUrl}" alt="${product.title}" referrerpolicy="no-referrer" />
 					</section>
 					<section class="detail-info" aria-labelledby="product-title">
-						<div>
+						<div class="product-summary">
 							<p class="eyebrow">${product.brand} - ${product.category}</p>
 							<h1 id="product-title">${product.title}</h1>
-						</div>
-
-						<div class="price-panel">
-							<span>Giá biến thể đang chọn</span>
-							<strong id="price-display">${formatVND(variant.price)}</strong>
-							<span>Khoảng giá dòng sản phẩm: ${priceRange(product)}</span>
-							<span>SKU: <b id="sku-display">${variant.sku}</b></span>
+							<p class="product-meta-line">
+								<span>Thương hiệu: <b>${product.brand}</b></span>
+								<span>Mã sản phẩm: <b id="sku-display">${variant.sku}</b></span>
+							</p>
+							<strong class="detail-price" id="price-display">${formatVND(variant.price)}</strong>
 						</div>
 
 						<div>
-							<p class="eyebrow">Chọn biến thể</p>
-							<div class="variant-list" id="variant-list">
-								${product.variants
-									.map(variantButtonTemplate)
-									.join("")}
-							</div>
+							${variantPickerTemplate()}
 						</div>
 
 						<form class="form-grid" id="customize-form">

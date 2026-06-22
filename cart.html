@@ -326,13 +326,8 @@
 				let option = optionParts
 					.join("/")
 					.normalize("NFC")
-					.replace(/^\s*pha lê cao cấp\s*[-–—]?\s*/i, "")
-					.replace(/^[\s\-–—/]+/, "")
 					.replace(/\s{2,}/g, " ")
 					.trim();
-				if (/^pha lê/i.test(option) && option.includes("-")) {
-					option = option.split("-").slice(1).join("-").trim();
-				}
 				return { size, option };
 			}
 
