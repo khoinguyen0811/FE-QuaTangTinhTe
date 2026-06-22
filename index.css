@@ -1352,6 +1352,18 @@ button {
   text-align: left;
 }
 
+.variant-size {
+  color: var(--brand-900);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.variant-option {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
 .variant-button[aria-pressed="true"] {
   border-color: var(--brand-700);
   background: var(--surface-blue);

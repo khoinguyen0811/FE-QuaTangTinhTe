@@ -19,6 +19,8 @@ Thumbs.db
 *.log
 *.tmp
 *.temp
+~$*.xlsx
+data/~$*.xlsx
 
 # Dependency/build output if added later
 node_modules/

@@ -320,6 +320,27 @@
 				return total;
 			}
 
+			function parseVariantTitle(title) {
+				const [sizePart, ...optionParts] = String(title || "").split("/");
+				const size = sizePart.trim();
+				let option = optionParts
+					.join("/")
+					.normalize("NFC")
+					.replace(/^\s*pha lê cao cấp\s*[-–—]?\s*/i, "")
+					.replace(/^[\s\-–—/]+/, "")
+					.replace(/\s{2,}/g, " ")
+					.trim();
+				if (/^pha lê/i.test(option) && option.includes("-")) {
+					option = option.split("-").slice(1).join("-").trim();
+				}
+				return { size, option };
+			}
+
+			function variantSummary(title) {
+				const variantInfo = parseVariantTitle(title);
+				return variantInfo.option ? `${variantInfo.size} - ${variantInfo.option}` : variantInfo.size;
+			}
+
 			function renderCart() {
 				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 				const wrapper = document.getElementById("cart-items-wrapper");
@@ -352,6 +373,7 @@
 					.map((item, index) => {
 						const itemTotal = item.price * item.quantity;
 						subtotal += itemTotal;
+						const variantLabel = variantSummary(item.variantTitle);
 						const customImage = item.customImageData || item.customImage || "";
 						const customText = item.customText
 							? `<span><strong>Khắc chữ:</strong> ${item.customText}</span>`
@@ -367,7 +389,7 @@
 								</a>
 								<div class="cart-item-info">
 									<h3><a href="product.html?id=${item.productId}">${item.title}</a></h3>
-									<p>SKU: <strong>${item.sku}</strong> | Phân loại: <strong>${item.variantTitle}</strong></p>
+									<p>SKU: <strong>${item.sku}</strong> | Phân loại: <strong>${variantLabel}</strong></p>
 									<div class="cart-item-tags">
 										${customText}
 										${customImageHtml}
@@ -466,8 +488,9 @@
 				cart.forEach((item, index) => {
 					const lineTotal = item.price * item.quantity;
 					itemsSubtotal += lineTotal;
+					const variantLabel = variantSummary(item.variantTitle);
 					orderLines.push(`${index + 1}. ${item.title}`);
-					orderLines.push(`   - Phân loại: ${item.variantTitle} (SKU: ${item.sku})`);
+					orderLines.push(`   - Phân loại: ${variantLabel} (SKU: ${item.sku})`);
 					orderLines.push(`   - Số lượng: ${item.quantity}`);
 					orderLines.push(`   - Đơn giá: ${formatVND(item.price)} | Thành tiền: ${formatVND(lineTotal)}`);
 					orderLines.push(`   - Khắc chữ: ${item.customText ? `"${item.customText}"` : "Không yêu cầu"}`);

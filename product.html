@@ -172,6 +172,34 @@
 				return min === max ? formatVND(min) : `${formatVND(min)} - ${formatVND(max)}`;
 			}
 
+			function parseVariantTitle(title) {
+				const [sizePart, ...optionParts] = String(title || "").split("/");
+				const size = sizePart.trim();
+				let option = optionParts
+					.join("/")
+					.normalize("NFC")
+					.replace(/^\s*pha lê cao cấp\s*[-–—]?\s*/i, "")
+					.replace(/^[\s\-–—/]+/, "")
+					.replace(/\s{2,}/g, " ")
+					.trim();
+				if (/^pha lê/i.test(option) && option.includes("-")) {
+					option = option.split("-").slice(1).join("-").trim();
+				}
+				return { size, option };
+			}
+
+			function variantButtonTemplate(item, index) {
+				const variantInfo = parseVariantTitle(item.title);
+				return `
+					<button class="variant-button" type="button" aria-pressed="${index === activeVariantIndex}" data-variant-index="${index}">
+						<span class="variant-size">${variantInfo.size}</span>
+						${variantInfo.option ? `<span class="variant-option">${variantInfo.option}</span>` : ""}
+						<strong>${formatVND(item.price)}</strong>
+						<small>${item.sku}</small>
+					</button>
+				`;
+			}
+
 			function updateCartBadge() {
 				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 				document.getElementById("cart-badge").textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -257,18 +285,10 @@
 						</div>
 
 						<div>
-							<p class="eyebrow">Chọn kích thước</p>
+							<p class="eyebrow">Chọn biến thể</p>
 							<div class="variant-list" id="variant-list">
 								${product.variants
-									.map(
-										(item, index) => `
-											<button class="variant-button" type="button" aria-pressed="${index === activeVariantIndex}" data-variant-index="${index}">
-												<span>${item.title}</span>
-												<strong>${formatVND(item.price)}</strong>
-												<small>${item.sku}</small>
-											</button>
-										`,
-									)
+									.map(variantButtonTemplate)
 									.join("")}
 							</div>
 						</div>
