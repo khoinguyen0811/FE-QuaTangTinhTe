@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="vi">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Giỏ hàng và thanh toán - Quà Tặng Tinh Tế</title>
+		<meta
+			name="description"
+			content="Xem lại sản phẩm pha lê khắc 3D đã chọn, điều chỉnh số lượng và gửi thông tin thanh toán nhanh qua Zalo."
+		/>
+		<link rel="canonical" href="https://quatangtinhte.vn/cart.html" />
+		<meta name="robots" content="noindex, follow" />
+		<meta property="og:title" content="Giỏ hàng và thanh toán - Quà Tặng Tinh Tế" />
+		<meta
+			property="og:description"
+			content="Hoàn tất thông tin giao nhận cho quà tặng pha lê khắc chân dung 3D."
+		/>
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="https://quatangtinhte.vn/public/images/slider_1.png" />
+		<link rel="icon" href="public/logo.png" type="image/png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+		<link rel="stylesheet" href="index.css" />
+	</head>
+	<body>
+		<a class="skip-link" href="#main-content">Bỏ qua để đến nội dung chính</a>
+
+		<div class="announcement" role="status">
+			Miễn phí dựng mẫu 3D trước khi khắc - tư vấn nhanh qua hotline 0983 833 830
+		</div>
+
+		<header class="site-header">
+			<div class="container nav-shell">
+				<a class="brand-link" href="index.html" aria-label="Trang chủ Quà Tặng Tinh Tế">
+					<img class="brand-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
+				</a>
+				<nav class="desktop-nav" aria-label="Menu chính">
+					<a href="index.html">Trang chủ</a>
+					<a href="collection.html">Bộ sưu tập</a>
+					<a href="index.html#process">Quy trình</a>
+					<a href="index.html#quality">Cam kết</a>
+					<a href="#footer">Liên hệ</a>
+				</nav>
+				<div class="header-actions">
+					<a class="icon-button" href="cart.html" aria-label="Xem giỏ hàng" aria-current="page">
+						<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+						<span id="cart-badge" class="cart-badge">0</span>
+					</a>
+					<button
+						class="icon-button menu-toggle"
+						id="mobile-menu-toggle"
+						type="button"
+						aria-expanded="false"
+						aria-controls="mobile-nav"
+						aria-label="Mở menu"
+					>
+						<i class="fa-solid fa-bars" aria-hidden="true"></i>
+					</button>
+				</div>
+			</div>
+			<nav id="mobile-nav" class="mobile-nav container" aria-label="Menu di động">
+				<a href="index.html">Trang chủ</a>
+				<a href="collection.html">Bộ sưu tập</a>
+				<a href="index.html#process">Quy trình</a>
+				<a href="index.html#quality">Cam kết</a>
+				<a href="#footer">Liên hệ</a>
+			</nav>
+		</header>
+
+		<main id="main-content" class="section section-tint cart-page">
+			<div class="container">
+				<nav class="breadcrumb" aria-label="Breadcrumb">
+					<a href="collection.html">
+						<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+						Tiếp tục chọn sản phẩm
+					</a>
+				</nav>
+
+				<div class="cart-heading">
+					<p class="eyebrow">Giỏ hàng và thanh toán</p>
+					<h1>Hoàn tất món quà pha lê của bạn.</h1>
+					<p>
+						Kiểm tra lại sản phẩm, chọn dịch vụ quà tặng nếu cần và gửi thông tin giao nhận để đội ngũ tư vấn xác nhận mẫu khắc.
+					</p>
+				</div>
+
+				<div id="cart-container" class="cart-layout">
+					<section class="cart-items-column" aria-labelledby="cart-items-title">
+						<div class="collection-group-heading">
+							<div>
+								<p class="eyebrow">Sản phẩm đã chọn</p>
+								<h2 id="cart-items-title">Giỏ hàng</h2>
+							</div>
+						</div>
+
+						<div id="cart-items-wrapper" class="cart-items-list" aria-live="polite">
+							<div class="empty-state">
+								<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+								Đang đồng bộ giỏ hàng...
+							</div>
+						</div>
+
+						<section id="gift-wrapping-panel" class="checkout-card hidden" aria-labelledby="gift-title">
+							<div class="checkout-card-heading">
+								<i class="fa-solid fa-gift" aria-hidden="true"></i>
+								<div>
+									<p class="eyebrow">Tùy chọn</p>
+									<h2 id="gift-title">Dịch vụ quà tặng</h2>
+								</div>
+							</div>
+
+							<div class="gift-options">
+								<label class="gift-option">
+									<input type="checkbox" id="gift-card-check" onchange="toggleGiftCardText(this)" />
+									<span>
+										<strong>Thiệp viết tay</strong>
+										<small>Tự viết lời chúc ấm áp</small>
+									</span>
+									<b>+20.000đ</b>
+								</label>
+								<label class="gift-option">
+									<input type="checkbox" id="gift-box-check" onchange="updateGiftPrice()" />
+									<span>
+										<strong>Hộp quà đặc biệt</strong>
+										<small>Hộp nhung đỏ thắt ruy băng</small>
+									</span>
+									<b>+50.000đ</b>
+								</label>
+								<label class="gift-option">
+									<input type="checkbox" id="gift-ribbon-check" onchange="updateGiftPrice()" />
+									<span>
+										<strong>Ruy băng lụa</strong>
+										<small>Hoàn thiện hộp quà khi trao tặng</small>
+									</span>
+									<b>+15.000đ</b>
+								</label>
+							</div>
+
+							<div id="gift-card-message-wrapper" class="field hidden">
+								<label for="gift-card-message">Nội dung viết lên thiệp quà tặng</label>
+								<input
+									id="gift-card-message"
+									type="text"
+									maxlength="100"
+									placeholder="Ví dụ: Chúc mừng sinh nhật anh yêu!"
+								/>
+							</div>
+						</section>
+					</section>
+
+					<aside id="cart-checkout-section" class="checkout-column" aria-labelledby="checkout-title">
+						<section class="checkout-card" aria-labelledby="summary-title">
+							<div class="checkout-card-heading">
+								<i class="fa-solid fa-receipt" aria-hidden="true"></i>
+								<div>
+									<p class="eyebrow">Tóm tắt</p>
+									<h2 id="summary-title">Đơn hàng</h2>
+								</div>
+							</div>
+							<dl class="summary-list">
+								<div>
+									<dt>Tạm tính sản phẩm</dt>
+									<dd id="subtotal-val">0đ</dd>
+								</div>
+								<div id="gift-summary-row" class="hidden">
+									<dt>Dịch vụ quà tặng</dt>
+									<dd id="gift-total-val">0đ</dd>
+								</div>
+								<div>
+									<dt>Phí vận chuyển</dt>
+									<dd id="shipping-val">Miễn phí</dd>
+								</div>
+								<div class="summary-total">
+									<dt>Tổng thanh toán</dt>
+									<dd id="grand-total-val">0đ</dd>
+								</div>
+							</dl>
+						</section>
+
+						<section class="checkout-card" aria-labelledby="checkout-title">
+							<div class="checkout-card-heading">
+								<i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+								<div>
+									<p class="eyebrow">Thông tin giao nhận</p>
+									<h2 id="checkout-title">Thanh toán</h2>
+								</div>
+							</div>
+							<form id="checkout-form" class="form-grid" onsubmit="handleCheckout(event)">
+								<div class="field">
+									<label for="fullname">Họ và tên người nhận *</label>
+									<input id="fullname" type="text" required placeholder="Nhập họ và tên đầy đủ" />
+								</div>
+								<div class="field">
+									<label for="phone">Số điện thoại liên hệ *</label>
+									<input id="phone" type="tel" required placeholder="Nhập số điện thoại" />
+								</div>
+								<div class="field">
+									<label for="address">Địa chỉ nhận hàng *</label>
+									<textarea id="address" required rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+								</div>
+								<div class="field">
+									<label for="notes">Ghi chú đơn hàng</label>
+									<textarea id="notes" rows="3" placeholder="Yêu cầu riêng về đóng gói, thời gian nhận hàng..."></textarea>
+								</div>
+								<button class="button button-primary checkout-submit" type="submit">
+									<i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+									Gửi đơn hàng qua Zalo
+								</button>
+							</form>
+							<p class="checkout-note">
+								Hệ thống sẽ sao chép tóm tắt đơn hàng để bạn dán vào khung chat Zalo và gửi kèm ảnh chân dung nếu cần.
+							</p>
+						</section>
+					</aside>
+				</div>
+			</div>
+
+			<div id="checkout-success-modal" class="checkout-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+				<div class="checkout-modal-panel">
+					<div class="modal-icon">
+						<i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+					</div>
+					<div>
+						<p class="eyebrow">Đã sao chép đơn hàng</p>
+						<h2 id="modal-title">Tiếp tục gửi thông tin qua Zalo.</h2>
+						<p>
+							Thông tin chi tiết đã được lưu vào clipboard. Vui lòng dán nội dung vào khung chat để đội ngũ tư vấn xác nhận mẫu.
+						</p>
+					</div>
+					<div class="modal-contact">
+						<span>Hotline</span>
+						<strong>0983 833 830</strong>
+					</div>
+					<button class="button button-primary" type="button" onclick="closeModalAndRedirect()">
+						Tiếp tục đến Zalo Chat
+					</button>
+				</div>
+			</div>
+		</main>
+
+		<footer id="footer" class="site-footer">
+			<div class="container footer-grid">
+				<section aria-labelledby="footer-brand">
+					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
+					<h2 id="footer-brand">Quà Tặng Tinh Tế</h2>
+					<p>Chế tác pha lê khắc chân dung 3D bằng laser, tư vấn mẫu và cá nhân hóa quà tặng theo từng dịp.</p>
+				</section>
+				<section aria-labelledby="footer-products">
+					<h3 id="footer-products">Dòng sản phẩm</h3>
+					<ul>
+						<li><a href="collection.html">Pha lê chữ nhật</a></li>
+						<li><a href="collection.html">Pha lê trái tim</a></li>
+						<li><a href="collection.html">Pha lê đa giác</a></li>
+						<li><a href="collection.html">Pha lê giọt nước</a></li>
+					</ul>
+				</section>
+				<section aria-labelledby="footer-service">
+					<h3 id="footer-service">Dịch vụ</h3>
+					<ul>
+						<li><a href="index.html#process">Dựng mẫu 3D miễn phí</a></li>
+						<li><a href="index.html#quality">Ảnh sản phẩm hiển thị đầy đủ</a></li>
+						<li><a href="cart.html">Đặt hàng qua giỏ hàng</a></li>
+						<li><a href="index.html">Về trang chủ</a></li>
+					</ul>
+				</section>
+				<section aria-labelledby="footer-contact">
+					<h3 id="footer-contact">Liên hệ</h3>
+					<ul>
+						<li>Hotline: <a href="tel:0983833830">0983 833 830</a></li>
+						<li>Email: <a href="mailto:info@quatangtinhte.vn">info@quatangtinhte.vn</a></li>
+						<li>TP. Hồ Chí Minh, Việt Nam</li>
+					</ul>
+				</section>
+			</div>
+			<div class="container footer-bottom">
+				<span>© 2026 Quà Tặng Tinh Tế. Bảo lưu mọi quyền.</span>
+				<span>Pha lê K9 - Khắc laser 3D - Cá nhân hóa theo yêu cầu</span>
+			</div>
+		</footer>
+
+		<script>
+			let compiledOrderString = "";
+
+			function formatVND(amount) {
+				return new Intl.NumberFormat("vi-VN", {
+					style: "currency",
+					currency: "VND",
+					maximumFractionDigits: 0,
+				}).format(amount);
+			}
+
+			function updateCartBadge() {
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+				document.getElementById("cart-badge").textContent = totalQty;
+			}
+
+			window.toggleGiftCardText = function (checkbox) {
+				const wrapper = document.getElementById("gift-card-message-wrapper");
+				wrapper.classList.toggle("hidden", !checkbox.checked);
+				if (!checkbox.checked) {
+					document.getElementById("gift-card-message").value = "";
+				}
+				renderCart();
+			};
+
+			window.updateGiftPrice = function () {
+				renderCart();
+			};
+
+			function giftTotal() {
+				let total = 0;
+				if (document.getElementById("gift-card-check")?.checked) total += 20000;
+				if (document.getElementById("gift-box-check")?.checked) total += 50000;
+				if (document.getElementById("gift-ribbon-check")?.checked) total += 15000;
+				return total;
+			}
+
+			function renderCart() {
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				const wrapper = document.getElementById("cart-items-wrapper");
+				const checkoutSection = document.getElementById("cart-checkout-section");
+				const giftWrappingPanel = document.getElementById("gift-wrapping-panel");
+
+				updateCartBadge();
+
+				if (!cart.length) {
+					wrapper.innerHTML = `
+						<div class="empty-state cart-empty-state">
+							<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+							<h2>Giỏ hàng của bạn đang trống</h2>
+							<p>Hãy lướt xem bộ sưu tập và chọn khối pha lê phù hợp với dịp tặng.</p>
+							<a class="button button-primary" href="collection.html">
+								Quay lại bộ sưu tập
+							</a>
+						</div>
+					`;
+					checkoutSection.classList.add("hidden");
+					giftWrappingPanel.classList.add("hidden");
+					return;
+				}
+
+				checkoutSection.classList.remove("hidden");
+				giftWrappingPanel.classList.remove("hidden");
+
+				let subtotal = 0;
+				wrapper.innerHTML = cart
+					.map((item, index) => {
+						const itemTotal = item.price * item.quantity;
+						subtotal += itemTotal;
+						const customImage = item.customImageData || item.customImage || "";
+						const customText = item.customText
+							? `<span><strong>Khắc chữ:</strong> ${item.customText}</span>`
+							: `<span><strong>Khắc chữ:</strong> Không yêu cầu</span>`;
+						const customImageHtml = customImage
+							? `<span><strong>Ảnh khắc:</strong> ${item.customImageName || "Đã gửi kèm"}</span>`
+							: `<span><strong>Ảnh khắc:</strong> Không gửi kèm</span>`;
+
+						return `
+							<article class="cart-item">
+								<a class="cart-item-media" href="product.html?id=${item.productId}" aria-label="Xem ${item.title}">
+									<img src="${item.imageUrl}" alt="${item.title}" referrerpolicy="no-referrer" />
+								</a>
+								<div class="cart-item-info">
+									<h3><a href="product.html?id=${item.productId}">${item.title}</a></h3>
+									<p>SKU: <strong>${item.sku}</strong> | Phân loại: <strong>${item.variantTitle}</strong></p>
+									<div class="cart-item-tags">
+										${customText}
+										${customImageHtml}
+									</div>
+								</div>
+								<div class="cart-item-actions">
+									<div class="cart-item-price">
+										<span>${formatVND(item.price)}</span>
+										<strong>${formatVND(itemTotal)}</strong>
+									</div>
+									<div class="cart-controls">
+										<div class="qty-control" aria-label="Số lượng ${item.title}">
+											<button type="button" onclick="changeQuantity(${index}, -1)" aria-label="Giảm số lượng">
+												<i class="fa-solid fa-minus" aria-hidden="true"></i>
+											</button>
+											<span>${item.quantity}</span>
+											<button type="button" onclick="changeQuantity(${index}, 1)" aria-label="Tăng số lượng">
+												<i class="fa-solid fa-plus" aria-hidden="true"></i>
+											</button>
+										</div>
+										<button class="icon-button cart-remove" type="button" onclick="removeItem(${index})" aria-label="Xóa sản phẩm khỏi giỏ">
+											<i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+										</button>
+									</div>
+								</div>
+							</article>
+						`;
+					})
+					.join("");
+
+				const wrappingTotal = giftTotal();
+				document.getElementById("subtotal-val").textContent = formatVND(subtotal);
+				document.getElementById("shipping-val").textContent = "Miễn phí";
+				document.getElementById("grand-total-val").textContent = formatVND(subtotal + wrappingTotal);
+
+				const giftSummaryRow = document.getElementById("gift-summary-row");
+				if (wrappingTotal > 0) {
+					giftSummaryRow.classList.remove("hidden");
+					document.getElementById("gift-total-val").textContent = formatVND(wrappingTotal);
+				} else {
+					giftSummaryRow.classList.add("hidden");
+				}
+			}
+
+			window.changeQuantity = function (index, change) {
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				if (!cart[index]) return;
+				cart[index].quantity = Math.max(1, cart[index].quantity + change);
+				localStorage.setItem("cart", JSON.stringify(cart));
+				renderCart();
+			};
+
+			window.removeItem = function (index) {
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				cart.splice(index, 1);
+				localStorage.setItem("cart", JSON.stringify(cart));
+				renderCart();
+			};
+
+			window.handleCheckout = function (event) {
+				event.preventDefault();
+
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				if (!cart.length) return;
+
+				const fullname = document.getElementById("fullname").value.trim();
+				const phone = document.getElementById("phone").value.trim();
+				const address = document.getElementById("address").value.trim();
+				const notes = document.getElementById("notes").value.trim();
+
+				let giftServices = [];
+				let wrappingTotal = 0;
+				if (document.getElementById("gift-card-check").checked) {
+					const message = document.getElementById("gift-card-message").value.trim();
+					giftServices.push(`- Thiệp viết tay (+20.000đ)${message ? `: "${message}"` : ""}`);
+					wrappingTotal += 20000;
+				}
+				if (document.getElementById("gift-box-check").checked) {
+					giftServices.push("- Hộp quà nhung đỏ cao cấp (+50.000đ)");
+					wrappingTotal += 50000;
+				}
+				if (document.getElementById("gift-ribbon-check").checked) {
+					giftServices.push("- Ruy băng lụa thắt nơ (+15.000đ)");
+					wrappingTotal += 15000;
+				}
+
+				let orderLines = [];
+				let itemsSubtotal = 0;
+				orderLines.push("=== ĐƠN ĐẶT HÀNG PHA LÊ 3D ===");
+				orderLines.push(`Khách hàng: ${fullname}`);
+				orderLines.push(`Số điện thoại: ${phone}`);
+				orderLines.push(`Địa chỉ nhận: ${address}`);
+				if (notes) orderLines.push(`Ghi chú: ${notes}`);
+				orderLines.push("----------------------------------");
+
+				cart.forEach((item, index) => {
+					const lineTotal = item.price * item.quantity;
+					itemsSubtotal += lineTotal;
+					orderLines.push(`${index + 1}. ${item.title}`);
+					orderLines.push(`   - Phân loại: ${item.variantTitle} (SKU: ${item.sku})`);
+					orderLines.push(`   - Số lượng: ${item.quantity}`);
+					orderLines.push(`   - Đơn giá: ${formatVND(item.price)} | Thành tiền: ${formatVND(lineTotal)}`);
+					orderLines.push(`   - Khắc chữ: ${item.customText ? `"${item.customText}"` : "Không yêu cầu"}`);
+					orderLines.push(`   - Hình khắc: ${item.customImageName ? `Đã gửi kèm (${item.customImageName})` : "Không gửi kèm"}`);
+					orderLines.push("");
+				});
+
+				if (giftServices.length) {
+					orderLines.push("----------------------------------");
+					orderLines.push("DỊCH VỤ QUÀ TẶNG:");
+					giftServices.forEach((service) => orderLines.push(service));
+					orderLines.push("");
+				}
+
+				const grandTotal = itemsSubtotal + wrappingTotal;
+				orderLines.push("----------------------------------");
+				orderLines.push(`Tạm tính sản phẩm: ${formatVND(itemsSubtotal)}`);
+				if (wrappingTotal > 0) orderLines.push(`Dịch vụ quà tặng: ${formatVND(wrappingTotal)}`);
+				orderLines.push("Phí vận chuyển: Miễn phí");
+				orderLines.push(`Tổng thanh toán: ${formatVND(grandTotal)}`);
+				orderLines.push("==================================");
+				orderLines.push("* Quý khách vui lòng gửi kèm ảnh chân dung cần khắc qua đoạn chat Zalo này.");
+
+				compiledOrderString = orderLines.join("\n");
+				navigator.clipboard
+					.writeText(compiledOrderString)
+					.then(() => {
+						document.getElementById("checkout-success-modal").classList.remove("hidden");
+					})
+					.catch(() => {
+						document.getElementById("checkout-success-modal").classList.remove("hidden");
+					});
+			};
+
+			window.closeModalAndRedirect = function () {
+				document.getElementById("checkout-success-modal").classList.add("hidden");
+				localStorage.removeItem("cart");
+				window.open("https://zalo.me/0983833830", "_blank");
+				renderCart();
+			};
+
+			document.getElementById("mobile-menu-toggle").addEventListener("click", () => {
+				const nav = document.getElementById("mobile-nav");
+				const button = document.getElementById("mobile-menu-toggle");
+				const isOpen = nav.classList.toggle("is-open");
+				button.setAttribute("aria-expanded", String(isOpen));
+				document.body.classList.toggle("menu-open", isOpen);
+			});
+
+			window.addEventListener("DOMContentLoaded", renderCart);
+		</script>
+	</body>
+</html>
