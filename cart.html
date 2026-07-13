@@ -391,7 +391,7 @@
 
 			function productHref(item) {
 				return item.slug
-					? `product.html?slug=${encodeURIComponent(item.slug)}`
+					? `/products/${encodeURIComponent(item.slug)}`
 					: `product.html?id=${encodeURIComponent(item.productId)}`;
 			}
 

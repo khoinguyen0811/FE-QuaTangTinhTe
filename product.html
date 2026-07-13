@@ -2,6 +2,7 @@
 <html lang="vi">
 	<head>
 		<meta charset="utf-8" />
+		<base href="/" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Chi tiết sản phẩm - Quà Tặng Tinh Tế</title>
 		<meta
@@ -798,6 +799,22 @@
 			let editModeActive = false;
 			let draftChanges = {};
 
+			function productSlugFromPath() {
+				const parts = window.location.pathname.split("/").filter(Boolean);
+				const productIndex = parts.findIndex((part) => part === "products" || part === "product");
+				if (productIndex === -1 || !parts[productIndex + 1]) return "";
+
+				try {
+					return decodeURIComponent(parts[productIndex + 1]);
+				} catch {
+					return parts[productIndex + 1];
+				}
+			}
+
+			function absoluteStorefrontUrl(path) {
+				return new URL(path, window.location.origin).href;
+			}
+
 			function formatVND(amount) {
 				return new Intl.NumberFormat("vi-VN", {
 					style: "currency",
@@ -888,7 +905,7 @@
 			function setMeta(productItem) {
 				document.title = `${productItem.metaTitle || productItem.title} - Quà Tặng Tinh Tế`;
 				document.querySelector('meta[name="description"]').setAttribute("content", productItem.metaDescription || productItem.title);
-				document.querySelector('link[rel="canonical"]').setAttribute("href", `https://quatangtinhte.vn/${StaticStorefront.productUrl(productItem)}`);
+				document.querySelector('link[rel="canonical"]').setAttribute("href", absoluteStorefrontUrl(StaticStorefront.productUrl(productItem)));
 				document.querySelector('meta[property="og:title"]').setAttribute("content", productItem.title);
 				document.querySelector('meta[property="og:description"]').setAttribute("content", productItem.metaDescription || productItem.title);
 				document.querySelector('meta[property="og:image"]').setAttribute("content", productItem.imageUrl);
@@ -915,7 +932,7 @@
 						highPrice: Math.max(...prices),
 						offerCount: productItem.variants.length,
 						availability: "https://schema.org/InStock",
-						url: `https://quatangtinhte.vn/${StaticStorefront.productUrl(productItem)}`,
+						url: absoluteStorefrontUrl(StaticStorefront.productUrl(productItem)),
 					},
 				});
 				document.head.appendChild(script);
@@ -1571,7 +1588,7 @@
 				container.innerHTML = `
 					<div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
 						${list.slice(0, 4).map(item => `
-							<a href="product.html?slug=${encodeURIComponent(item.slug)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+							<a href="${StaticStorefront.productUrl(item)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
 								<div style="aspect-ratio: 1; overflow: hidden; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
 									<img src="${item.images?.[0] || item.imageUrl || 'public/images/slider_1.png'}" style="width: 100%; height: 100%; object-fit: contain; padding: 12px;" />
 								</div>
@@ -1615,7 +1632,7 @@
 				container.innerHTML = `
 					<div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
 						${list.map(item => `
-							<a href="product.html?slug=${encodeURIComponent(item.slug)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+							<a href="${StaticStorefront.productUrl(item)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
 								<div style="aspect-ratio: 1; overflow: hidden; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
 									<img src="${item.imageUrl}" style="width: 100%; height: 100%; object-fit: contain; padding: 12px;" />
 								</div>
@@ -1867,7 +1884,7 @@
 
 			async function loadProduct() {
 				StaticStorefront.mountAdminLoginButton(loadProduct);
-				const slug = params.get("slug");
+				const slug = params.get("slug") || productSlugFromPath();
 				const id = Number(params.get("id") || 0);
 				product = slug
 					? await StaticStorefront.loadProductBySlug(slug)

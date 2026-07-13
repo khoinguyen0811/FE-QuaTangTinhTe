@@ -172,6 +172,7 @@
     return {
       id: Number(row.id),
       slug: row.slug || "",
+      sourceUrl: row.sourceUrl || row.source_url || "",
       title: row.name || row.title || "Sản phẩm",
       brand: row.brand || "Quà Tặng Tinh Tế",
       category: row.category_name || row.category || "Sản phẩm",
@@ -208,8 +209,13 @@
   }
 
   function productUrl(product) {
-    return product.slug
-      ? `product.html?slug=${encodeURIComponent(product.slug)}`
+    const slug = product.slug
+      || String(product.sourceUrl || "").split("/products/")[1]?.split(/[?#/]/)[0]
+      || "";
+    const prefix = resolveProjectPrefix();
+
+    return slug
+      ? `${prefix}/products/${encodeURIComponent(slug)}`
       : `product.html?id=${encodeURIComponent(product.id)}`;
   }
 

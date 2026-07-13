@@ -1,7 +1,6 @@
 # Local agent and rule files
 AGENTS.md
 GEMINI.md
-README.md
 .agent/
 .codex/
 .openai/
