@@ -54,6 +54,7 @@ const products = loadProductsData();
 const collectionGroups = categoryGroups(products);
 writeProductPages(products);
 writeCollectionPages(collectionGroups);
+writeCollectionIndexPage(products);
 writePleskHtaccess();
 writeRobotsTxt();
 writeSitemapXml(products, collectionGroups);
@@ -63,6 +64,7 @@ console.log(`Plesk assets generated for ${siteUrl}`);
 console.log(apiBase ? `API base locked to ${apiBase}` : "API base uses runtime default /backend/public");
 console.log(`Pre-rendered ${products.filter(productSlug).length} product pages`);
 console.log(`Pre-rendered ${collectionGroups.length} category pages`);
+console.log(`Pre-rendered collection index with ${products.filter(productSlug).length} products`);
 
 function normalizeSiteUrl(value) {
   const raw = String(value || "").trim().replace(/\/+$/, "");
@@ -367,7 +369,7 @@ function collectionSchema(group, canonical) {
     "@type": "CollectionPage",
     name: `${group.name} - Quà Tặng Tinh Tế`,
     url: canonical,
-    description: `Bộ sưu tập ${group.name} gồm ${group.products.length} mẫu quà tặng pha lê khắc 3D.`,
+    description: group.description || `Bộ sưu tập ${group.name} gồm ${group.products.length} mẫu quà tặng pha lê khắc 3D.`,
     mainEntity: {
       "@type": "ItemList",
       itemListElement: group.products
@@ -436,6 +438,58 @@ function writeCollectionPages(groups = []) {
     fs.mkdirSync(targetDir, { recursive: true });
     fs.writeFileSync(path.join(targetDir, "index.html"), html, "utf8");
   });
+}
+
+function writeCollectionIndexPage(products = []) {
+  const templatePath = path.join(outDir, "collection.html");
+  if (!fs.existsSync(templatePath)) return;
+
+  const visibleProducts = products.filter(productSlug);
+  const canonical = `${siteUrl}/collection.html`;
+  const title = "Bộ sưu tập pha lê khắc 3D - Quà Tặng Tinh Tế";
+  const description = truncate(
+    `Khám phá ${visibleProducts.length} mẫu quà tặng pha lê khắc 3D theo danh mục, mức giá và kiểu dáng để chọn món quà phù hợp.`,
+    155
+  );
+  const schema = collectionSchema(
+    {
+      name: "Bộ sưu tập pha lê khắc 3D",
+      description,
+      products: visibleProducts,
+    },
+    canonical
+  );
+  const cardsHtml = visibleProducts.map(buildCollectionProductCard).filter(Boolean).join("");
+
+  let html = fs.readFileSync(templatePath, "utf8")
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+    .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
+    .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`);
+
+  html = replaceOrInsertMetaProperty(html, "og:title", title);
+  html = replaceOrInsertMetaProperty(html, "og:description", description);
+  html = replaceOrInsertMetaProperty(html, "og:url", canonical);
+  html = replaceOrInsertMetaProperty(html, "og:image", productImage(visibleProducts[0] || {}));
+  html = html.replace(
+    /<script\s+type="application\/ld\+json">\s*[\s\S]*?<\/script>/i,
+    `<script type="application/ld+json">${JSON.stringify(schema)}</script>`
+  );
+  html = html.replace(
+    /<h2 id="collection-title">[\s\S]*?<\/h2>/i,
+    `<h2 id="collection-title">Tất cả sản phẩm pha lê</h2>`
+  );
+  html = html.replace(
+    /<p id="collection-result-count" class="collection-count">[\s\S]*?<\/p>/i,
+    `<p id="collection-result-count" class="collection-count">${visibleProducts.length} sản phẩm</p>`
+  );
+  html = html.replace(
+    /<div id="collection-product-grid" class="product-grid collection-product-grid" aria-live="polite">\s*<\/div>/i,
+    `<div id="collection-product-grid" class="product-grid collection-product-grid" aria-live="polite" data-prerendered="true">
+						${cardsHtml}
+					</div>`
+  );
+
+  fs.writeFileSync(templatePath, html, "utf8");
 }
 
 function urlEntry(loc, priority = "0.7", changefreq = "weekly") {
