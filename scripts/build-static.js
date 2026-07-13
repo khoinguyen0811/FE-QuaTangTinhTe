@@ -16,6 +16,12 @@ const files = [
   "register.html",
   "about.html",
   "contact.html",
+  "policy-purchase.html",
+  "policy-shipping.html",
+  "policy-payment.html",
+  "policy-return.html",
+  "policy-refund.html",
+  "policy-privacy.html",
   "index.css",
   "static-client.js",
 ];
@@ -749,6 +755,12 @@ function writeSitemapXml(products = [], groups = categoryGroups(products)) {
     ["/collection.html", "0.9", "daily"],
     ["/about.html", "0.6", "monthly"],
     ["/contact.html", "0.5", "monthly"],
+    ["/policy-purchase.html", "0.4", "monthly"],
+    ["/policy-shipping.html", "0.4", "monthly"],
+    ["/policy-payment.html", "0.4", "monthly"],
+    ["/policy-return.html", "0.4", "monthly"],
+    ["/policy-refund.html", "0.4", "monthly"],
+    ["/policy-privacy.html", "0.4", "monthly"],
   ];
 
   const collectionUrls = groups
