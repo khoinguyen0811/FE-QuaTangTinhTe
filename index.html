@@ -849,7 +849,9 @@
 			}
 
 			function injectItemListSchema() {
+				document.getElementById("home-item-list-schema")?.remove();
 				const script = document.createElement("script");
+				script.id = "home-item-list-schema";
 				script.type = "application/ld+json";
 				script.textContent = JSON.stringify({
 					"@context": "https://schema.org",
@@ -1027,8 +1029,10 @@
 
 			initializeStorefront().catch((error) => {
 				console.error("Storefront init failed", error);
-				newProductGrid.innerHTML = `<div class="empty-state">Không tải được dữ liệu sản phẩm. ${error?.message || "Hãy kiểm tra backend/API."}</div>`;
-				recommendedProductGrid.innerHTML = "";
+				if (newProductGrid.dataset.prerendered !== "true") {
+					newProductGrid.innerHTML = `<div class="empty-state">Không tải được dữ liệu sản phẩm. ${error?.message || "Hãy kiểm tra backend/API."}</div>`;
+					recommendedProductGrid.innerHTML = "";
+				}
 				updateCartBadge();
 			});
 		</script>

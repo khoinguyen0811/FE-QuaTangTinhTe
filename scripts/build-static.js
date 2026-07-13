@@ -55,6 +55,7 @@ const collectionGroups = categoryGroups(products);
 writeProductPages(products);
 writeCollectionPages(collectionGroups);
 writeCollectionIndexPage(products);
+writeHomePage(products);
 writePleskHtaccess();
 writeRobotsTxt();
 writeSitemapXml(products, collectionGroups);
@@ -65,6 +66,7 @@ console.log(apiBase ? `API base locked to ${apiBase}` : "API base uses runtime d
 console.log(`Pre-rendered ${products.filter(productSlug).length} product pages`);
 console.log(`Pre-rendered ${collectionGroups.length} category pages`);
 console.log(`Pre-rendered collection index with ${products.filter(productSlug).length} products`);
+console.log(`Pre-rendered homepage product links`);
 
 function normalizeSiteUrl(value) {
   const raw = String(value || "").trim().replace(/\/+$/, "");
@@ -321,6 +323,49 @@ function buildCollectionProductCard(product) {
 							</article>`;
 }
 
+function buildHomeProductCard(product) {
+  const slug = productSlug(product);
+  if (!slug) return "";
+
+  const detailUrl = `/products/${encodeURIComponent(slug)}/`;
+  const image = productImage(product);
+  const prices = productPrices(product);
+  const priceLine = prices.length
+    ? prices.length === 1
+      ? formatVnd(prices[0])
+      : `${formatVnd(Math.min(...prices))} - ${formatVnd(Math.max(...prices))}`
+    : "Liên hệ";
+  const variantCount = Array.isArray(product.variants) ? product.variants.length : 0;
+
+  return `
+									<article class="product-card" style="position: relative;">
+										<a class="product-media" href="${escapeHtml(detailUrl)}" aria-label="Xem chi tiết ${escapeHtml(product.title)}">
+											<img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" referrerpolicy="no-referrer" />
+										</a>
+										<div class="product-body">
+											<div class="product-meta">
+												<span>${escapeHtml(product.brand || "Quà Tặng Tinh Tế")}</span>
+												<span>${escapeHtml(productCategory(product))}</span>
+												<span>${variantCount} lựa chọn</span>
+											</div>
+											<h3><a href="${escapeHtml(detailUrl)}">${escapeHtml(product.title)}</a></h3>
+											<div class="price-line">
+												<span>Giá từ</span>
+												<strong>${escapeHtml(priceLine)}</strong>
+											</div>
+											<div class="card-actions">
+												<button class="button button-primary product-buy-now" type="button" data-product-id="${escapeHtml(product.id)}">
+													<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+													Mua ngay
+												</button>
+												<button class="button button-secondary product-add-cart" type="button" data-product-id="${escapeHtml(product.id)}" aria-label="Thêm ${escapeHtml(product.title)} vào giỏ hàng">
+													<i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+												</button>
+											</div>
+										</div>
+									</article>`;
+}
+
 function writeProductPages(products = []) {
   const templatePath = path.join(outDir, "product.html");
   if (!fs.existsSync(templatePath)) return;
@@ -361,6 +406,23 @@ function writeProductPages(products = []) {
     fs.mkdirSync(targetDir, { recursive: true });
     fs.writeFileSync(path.join(targetDir, "index.html"), html, "utf8");
   });
+}
+
+function homeItemListSchema(products = []) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products
+      .map((product) => ({ product, slug: productSlug(product) }))
+      .filter((entry) => entry.slug)
+      .slice(0, 12)
+      .map((entry, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${siteUrl}/products/${encodeURIComponent(entry.slug)}/`,
+        name: entry.product.title,
+      })),
+  };
 }
 
 function collectionSchema(group, canonical) {
@@ -487,6 +549,57 @@ function writeCollectionIndexPage(products = []) {
     `<div id="collection-product-grid" class="product-grid collection-product-grid" aria-live="polite" data-prerendered="true">
 						${cardsHtml}
 					</div>`
+  );
+
+  fs.writeFileSync(templatePath, html, "utf8");
+}
+
+function writeHomePage(products = []) {
+  const templatePath = path.join(outDir, "index.html");
+  if (!fs.existsSync(templatePath)) return;
+
+  const visibleProducts = products.filter(productSlug);
+  const firstGroupSize = Math.min(8, Math.ceil(visibleProducts.length / 2));
+  const newProducts = visibleProducts.slice(0, firstGroupSize);
+  const recommendedProducts = visibleProducts.slice(firstGroupSize);
+  const itemListSchema = homeItemListSchema(visibleProducts);
+
+  let html = fs.readFileSync(templatePath, "utf8");
+  html = html.replace(
+    /<p id="product-count">[\s\S]*?<\/p>/i,
+    `<p id="product-count">${visibleProducts.length} sản phẩm</p>`
+  );
+  html = html.replace(
+    /<span id="new-products-count" class="collection-count"\s*>[\s\S]*?<\/span\s*>/i,
+    `<span id="new-products-count" class="collection-count">${newProducts.length} mẫu</span>`
+  );
+  html = html.replace(
+    /<span id="recommended-products-count" class="collection-count"\s*>[\s\S]*?<\/span\s*>/i,
+    `<span id="recommended-products-count" class="collection-count">${recommendedProducts.length} mẫu</span>`
+  );
+  html = html.replace(
+    /<div\s+id="new-product-grid"\s+class="product-grid product-grid-compact"\s*>\s*<\/div>/i,
+    `<div
+								id="new-product-grid"
+								class="product-grid product-grid-compact"
+								data-prerendered="true"
+							>
+								${newProducts.map(buildHomeProductCard).filter(Boolean).join("")}
+							</div>`
+  );
+  html = html.replace(
+    /<div\s+id="recommended-product-grid"\s+class="product-grid product-grid-compact"\s*>\s*<\/div>/i,
+    `<div
+								id="recommended-product-grid"
+								class="product-grid product-grid-compact"
+								data-prerendered="true"
+							>
+								${recommendedProducts.map(buildHomeProductCard).filter(Boolean).join("")}
+							</div>`
+  );
+  html = html.replace(
+    /<\/head>/i,
+    `\t\t<script id="home-item-list-schema" type="application/ld+json">${JSON.stringify(itemListSchema)}</script>\n\t</head>`
   );
 
   fs.writeFileSync(templatePath, html, "utf8");
