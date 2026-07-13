@@ -5,6 +5,7 @@ const vm = require("vm");
 const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "dist");
 const siteUrl = normalizeSiteUrl(process.env.SITE_URL || "https://quatangtinhte.vn");
+const apiBase = normalizeBuildApiBase(process.env.API_BASE || "");
 
 const files = [
   "index.html",
@@ -55,6 +56,7 @@ writeSitemapXml();
 
 console.log(`Static site copied to ${path.relative(root, outDir)}`);
 console.log(`Plesk assets generated for ${siteUrl}`);
+console.log(apiBase ? `API base locked to ${apiBase}` : "API base uses runtime default /backend/public");
 
 function normalizeSiteUrl(value) {
   const raw = String(value || "").trim().replace(/\/+$/, "");
@@ -63,7 +65,16 @@ function normalizeSiteUrl(value) {
 }
 
 function applyBuildReplacements(content) {
-  return content.replace(/https:\/\/quatangtinhte\.vn/g, siteUrl);
+  return content
+    .replace(/https:\/\/quatangtinhte\.vn/g, siteUrl)
+    .replace(/__API_BASE__/g, apiBase || "__API_BASE__");
+}
+
+function normalizeBuildApiBase(value) {
+  const raw = String(value || "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return raw.startsWith("/") ? raw : `/${raw}`;
 }
 
 function xmlEscape(value) {

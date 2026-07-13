@@ -33,6 +33,32 @@ Trên PowerShell:
 $env:SITE_URL="https://demo-quatangtinhte.mbws.vn"; npm.cmd run build
 ```
 
+## API Base
+
+Mặc định frontend sẽ gọi backend cùng domain tại:
+
+```txt
+/backend/public
+```
+
+Nếu BE nằm ở subdomain/domain riêng, truyền thêm `API_BASE` khi build:
+
+```bash
+SITE_URL=https://demo-quatangtinhte.mbws.vn API_BASE=https://api-demo-quatangtinhte.mbws.vn npm run build
+```
+
+Trên PowerShell:
+
+```powershell
+$env:SITE_URL="https://demo-quatangtinhte.mbws.vn"
+$env:API_BASE="https://api-demo-quatangtinhte.mbws.vn"
+npm.cmd run build
+Remove-Item Env:SITE_URL
+Remove-Item Env:API_BASE
+```
+
+Nếu BE vẫn nằm chung hosting Plesk theo đường dẫn `/backend/public`, không cần set `API_BASE`.
+
 ## Output Plesk
 
 `npm run build` sẽ tạo:
@@ -60,3 +86,4 @@ $env:SITE_URL="https://demo-quatangtinhte.mbws.vn"; npm.cmd run build
 - `product.html` tự đọc slug từ path hoặc query `?slug=`.
 - Cart/login/register không nằm trong sitemap và được robots noindex/follow trong HTML.
 - Khi đổi domain, luôn build lại với `SITE_URL` đúng để canonical, Open Graph và sitemap khớp domain.
+- Khi đổi nơi đặt backend, build lại với `API_BASE` đúng để các request API không bị trỏ nhầm.

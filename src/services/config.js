@@ -20,7 +20,19 @@ function resolveProjectPrefix() {
   return '';
 }
 
-export const API_BASE = `${window.location.origin}${resolveProjectPrefix()}/backend/public`;
+const BUILD_API_BASE = '__API_BASE__';
+const API_BASE_PLACEHOLDER = ['__', 'API', '_BASE__'].join('');
+
+function normalizeApiBase(value) {
+  const raw = String(value || '').trim().replace(/\/+$/, '');
+  if (!raw || raw === API_BASE_PLACEHOLDER) {
+    return `${window.location.origin}${resolveProjectPrefix()}/backend/public`;
+  }
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `${window.location.origin}${raw.startsWith('/') ? raw : `/${raw}`}`;
+}
+
+export const API_BASE = normalizeApiBase(window.STOREFRONT_CONFIG?.API_BASE || BUILD_API_BASE);
 
 export const STORAGE_KEYS = {
   CART: 'dhat_cart',

@@ -127,14 +127,7 @@
 				const params = new URLSearchParams(window.location.search);
 				const next = params.get("next") || "/";
 
-				function resolveProjectPrefix() {
-					const { hostname, pathname } = window.location;
-					if (hostname.endsWith(".test")) return "";
-					if (pathname.startsWith("/sly%202/") || pathname.startsWith("/sly 2/")) return "/sly%202";
-					return "";
-				}
-
-				const API_BASE = `${window.location.origin}${resolveProjectPrefix()}/backend/public`;
+				const API_BASE = window.StaticStorefront?.API_BASE || `${window.location.origin}/backend/public`;
 
 				function validPassword(value) {
 					return value.length >= 8 && /[A-Za-zÀ-ỹ]/.test(value) && /\d/.test(value);
