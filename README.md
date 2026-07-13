@@ -66,6 +66,7 @@ Nếu BE vẫn nằm chung hosting Plesk theo đường dẫn `/backend/public`,
 - `dist/.htaccess`: rewrite clean URL, security headers, cache headers.
 - `dist/robots.txt`: rule index/noindex cơ bản.
 - `dist/sitemap.xml`: home, collection, about, contact và product URL dạng `/products/{slug}`.
+- `dist/products/{slug}/index.html`: HTML pre-render cho từng sản phẩm trong `data/products.js`.
 - Các file HTML/CSS/JS/public/data cần upload.
 
 ## Deploy Plesk
@@ -83,7 +84,8 @@ Nếu BE vẫn nằm chung hosting Plesk theo đường dẫn `/backend/public`,
 ## Ghi chú SEO
 
 - Product clean URL `/products/{slug}` được Plesk rewrite nội bộ về `product.html`.
-- `product.html` tự đọc slug từ path hoặc query `?slug=`.
+- Product đã có trong `data/products.js` sẽ có HTML pre-render riêng tại `/products/{slug}/`.
+- `product.html` vẫn tự đọc slug từ path hoặc query `?slug=` để làm fallback/hydration.
 - Cart/login/register không nằm trong sitemap và được robots noindex/follow trong HTML.
 - Khi đổi domain, luôn build lại với `SITE_URL` đúng để canonical, Open Graph và sitemap khớp domain.
 - Khi đổi nơi đặt backend, build lại với `API_BASE` đúng để các request API không bị trỏ nhầm.

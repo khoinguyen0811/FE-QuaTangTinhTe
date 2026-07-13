@@ -50,13 +50,16 @@ fs.mkdirSync(outDir, { recursive: true });
 
 files.forEach(copyFile);
 directories.forEach(copyDirectory);
+const products = loadProductsData();
+writeProductPages(products);
 writePleskHtaccess();
 writeRobotsTxt();
-writeSitemapXml();
+writeSitemapXml(products);
 
 console.log(`Static site copied to ${path.relative(root, outDir)}`);
 console.log(`Plesk assets generated for ${siteUrl}`);
 console.log(apiBase ? `API base locked to ${apiBase}` : "API base uses runtime default /backend/public");
+console.log(`Pre-rendered ${products.filter(productSlug).length} product pages`);
 
 function normalizeSiteUrl(value) {
   const raw = String(value || "").trim().replace(/\/+$/, "");
@@ -86,6 +89,33 @@ function xmlEscape(value) {
     .replace(/'/g, "&apos;");
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function stripHtml(value = "") {
+  return String(value).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function truncate(value = "", max = 160) {
+  const text = stripHtml(value);
+  return text.length > max ? `${text.slice(0, max - 1).trim()}…` : text;
+}
+
+function formatVnd(value) {
+  const number = Number(value || 0);
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(number);
+}
+
 function loadProductsData() {
   const file = path.join(root, "data", "products.js");
   if (!fs.existsSync(file)) return [];
@@ -110,6 +140,151 @@ function productSlug(product) {
   return "";
 }
 
+function productImage(product) {
+  if (product.imageUrl) return product.imageUrl;
+  if (product.image_url) return product.image_url;
+  if (Array.isArray(product.images) && product.images[0]) return product.images[0];
+  return "public/images/slider_1.png";
+}
+
+function productPrices(product) {
+  return (Array.isArray(product.variants) ? product.variants : [])
+    .map((variant) => Number(variant.price || 0))
+    .filter((price) => Number.isFinite(price) && price > 0);
+}
+
+function productDescriptionHtml(product) {
+  const raw = product.description || product.metaDescription || product.title || "";
+  return String(raw)
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
+
+function productSchema(product, slug, canonical) {
+  const prices = productPrices(product);
+  const lowPrice = prices.length ? Math.min(...prices) : undefined;
+  const highPrice = prices.length ? Math.max(...prices) : undefined;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.metaTitle || product.title,
+    image: [productImage(product)],
+    description: product.metaDescription || truncate(product.description || product.title),
+    brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
+    sku: product.variants?.[0]?.sku || slug,
+    offers: prices.length
+      ? {
+          "@type": prices.length > 1 ? "AggregateOffer" : "Offer",
+          priceCurrency: "VND",
+          lowPrice,
+          highPrice,
+          price: prices.length === 1 ? lowPrice : undefined,
+          offerCount: prices.length,
+          availability: "https://schema.org/InStock",
+          url: canonical,
+        }
+      : undefined,
+  };
+}
+
+function replaceOrInsertMetaProperty(html, property, content) {
+  const escapedContent = escapeHtml(content);
+  const pattern = new RegExp(`<meta\\s+property="${property}"\\s+content="[^"]*"\\s*\\/?>`, "i");
+  const meta = `<meta property="${property}" content="${escapedContent}" />`;
+  if (pattern.test(html)) return html.replace(pattern, meta);
+  return html.replace(/(<meta\s+property="og:type"[^>]*>\s*)/i, `$1\n\t\t${meta}\n\t\t`);
+}
+
+function buildProductInitialHtml(product, slug) {
+  const image = productImage(product);
+  const prices = productPrices(product);
+  const priceLine = prices.length
+    ? prices.length === 1
+      ? formatVnd(prices[0])
+      : `${formatVnd(Math.min(...prices))} - ${formatVnd(Math.max(...prices))}`
+    : "Liên hệ";
+  const variants = (Array.isArray(product.variants) ? product.variants : []).slice(0, 6);
+
+  return `
+				<div id="product-container" class="product-detail" aria-live="polite" data-prerendered="true" data-product-slug="${escapeHtml(slug)}">
+					<section class="detail-gallery" aria-label="Ảnh sản phẩm">
+						<div id="media-viewport">
+							<img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" width="900" height="900" fetchpriority="high" />
+						</div>
+					</section>
+					<section class="detail-info" aria-labelledby="product-title">
+						<div class="product-summary">
+							<p class="eyebrow">${escapeHtml(product.category || "Sản phẩm pha lê")}</p>
+							<h1 id="product-title">${escapeHtml(product.title)}</h1>
+							<p class="product-meta-line">
+								<span>${escapeHtml(product.brand || "Quà Tặng Tinh Tế")}</span>
+								<span>${escapeHtml(product.variants?.[0]?.sku || slug)}</span>
+							</p>
+							<div class="price-display-wrapper">
+								<strong class="detail-price">${escapeHtml(priceLine)}</strong>
+							</div>
+							<p class="stock-status"><span class="stock-dot"></span>Còn hàng</p>
+						</div>
+						${variants.length ? `
+						<div class="variant-list" aria-label="Biến thể sản phẩm">
+							${variants.map((variant) => `
+							<div class="variant-group">
+								<p class="variant-label">${escapeHtml(variant.title || variant.sku || "Tùy chọn")} <strong>${formatVnd(variant.price)}</strong></p>
+							</div>`).join("")}
+						</div>` : ""}
+						<div class="product-description">
+							${productDescriptionHtml(product)}
+						</div>
+					</section>
+				</div>`;
+}
+
+function writeProductPages(products = []) {
+  const templatePath = path.join(outDir, "product.html");
+  if (!fs.existsSync(templatePath)) return;
+
+  const template = fs.readFileSync(templatePath, "utf8");
+  products.forEach((product) => {
+    const slug = productSlug(product);
+    if (!slug) return;
+
+    const canonical = `${siteUrl}/products/${encodeURIComponent(slug)}/`;
+    const title = `${product.metaTitle || product.title} - Quà Tặng Tinh Tế`;
+    const description = product.metaDescription || truncate(product.description || product.title);
+    const image = productImage(product);
+    const schema = productSchema(product, slug, canonical);
+    let html = template
+      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+      .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
+      .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`);
+
+    html = replaceOrInsertMetaProperty(html, "og:title", product.title);
+    html = replaceOrInsertMetaProperty(html, "og:description", description);
+    html = replaceOrInsertMetaProperty(html, "og:image", image);
+    html = replaceOrInsertMetaProperty(html, "og:url", canonical);
+    html = html.replace(
+      /<span id="breadcrumb-category"([^>]*)>[\s\S]*?<\/span>/i,
+      `<span id="breadcrumb-category"$1>${escapeHtml(product.category || "Sản phẩm")} / ${escapeHtml(product.title)}</span>`
+    );
+    html = html.replace(
+      /<div id="product-container" class="product-detail" aria-live="polite">\s*<div class="empty-state">Đang tải chi tiết sản phẩm\.\.\.<\/div>\s*<\/div>/i,
+      buildProductInitialHtml(product, slug)
+    );
+    html = html.replace(
+      /<\/head>/i,
+      `\t\t<script id="static-product-schema" type="application/ld+json">${JSON.stringify(schema)}</script>\n\t</head>`
+    );
+
+    const targetDir = path.join(outDir, "products", slug);
+    fs.mkdirSync(targetDir, { recursive: true });
+    fs.writeFileSync(path.join(targetDir, "index.html"), html, "utf8");
+  });
+}
+
 function urlEntry(loc, priority = "0.7", changefreq = "weekly") {
   return [
     "  <url>",
@@ -121,7 +296,7 @@ function urlEntry(loc, priority = "0.7", changefreq = "weekly") {
   ].join("\n");
 }
 
-function writeSitemapXml() {
+function writeSitemapXml(products = []) {
   const staticUrls = [
     ["/", "1.0", "daily"],
     ["/collection.html", "0.9", "daily"],
@@ -129,10 +304,10 @@ function writeSitemapXml() {
     ["/contact.html", "0.5", "monthly"],
   ];
 
-  const productUrls = loadProductsData()
+  const productUrls = products
     .map(productSlug)
     .filter(Boolean)
-    .map((slug) => [`/products/${encodeURIComponent(slug)}`, "0.8", "weekly"]);
+    .map((slug) => [`/products/${encodeURIComponent(slug)}/`, "0.8", "weekly"]);
 
   const entries = [...staticUrls, ...productUrls]
     .map(([loc, priority, changefreq]) => urlEntry(loc, priority, changefreq))
@@ -179,6 +354,10 @@ function writePleskHtaccess() {
       "",
       "  RewriteCond %{THE_REQUEST} \\s/+index\\.html[\\s?] [NC]",
       "  RewriteRule ^index\\.html$ / [R=301,L]",
+      "",
+      "  RewriteCond %{REQUEST_FILENAME} -f [OR]",
+      "  RewriteCond %{REQUEST_FILENAME} -d",
+      "  RewriteRule ^ - [L]",
       "",
       "  RewriteRule ^products/([^/]+)/?$ product.html [L,QSA]",
       "  RewriteRule ^product/([^/]+)/?$ product.html [L,QSA]",

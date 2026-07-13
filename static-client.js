@@ -227,7 +227,7 @@
     const prefix = resolveProjectPrefix();
 
     return slug
-      ? `${prefix}/products/${encodeURIComponent(slug)}`
+      ? `${prefix}/products/${encodeURIComponent(slug)}/`
       : `product.html?id=${encodeURIComponent(product.id)}`;
   }
 
