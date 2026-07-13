@@ -63,6 +63,7 @@
 		</script>
 	</head>
 	<body>
+		<div id="app" style="display:none;"></div>
 		<a class="skip-link" href="#main-content">Bỏ qua để đến nội dung chính</a>
 
 		<div class="announcement" role="status">
@@ -74,7 +75,7 @@
 			<div class="container nav-shell">
 				<a
 					class="brand-link"
-					href="index.html"
+					href="/"
 					aria-label="Trang chủ Quà Tặng Tinh Tế"
 				>
 					<img
@@ -85,11 +86,10 @@
 				</a>
 
 				<nav class="desktop-nav" aria-label="Menu chính">
-					<a href="index.html" aria-current="page">Trang chủ</a>
+					<a href="/" aria-current="page">Trang chủ</a>
+					<a href="about.html">Giới thiệu</a>
 					<a href="collection.html">Bộ sưu tập</a>
-					<a href="#process">Quy trình</a>
-					<a href="#quality">Cam kết</a>
-					<a href="#footer">Liên hệ</a>
+					<a href="contact.html">Liên hệ</a>
 				</nav>
 
 				<div class="header-actions">
@@ -106,6 +106,10 @@
 					<a class="icon-button" href="cart.html" aria-label="Xem giỏ hàng">
 						<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
 						<span id="cart-badge" class="cart-badge">0</span>
+					</a>
+					<a class="icon-button" href="login.html" data-auth-link aria-label="Đăng nhập tài khoản">
+						<i class="fa-solid fa-user" aria-hidden="true"></i>
+						<span class="sr-only" data-auth-label>Đăng nhập</span>
 					</a>
 					<button
 						class="icon-button menu-toggle"
@@ -124,11 +128,11 @@
 				class="mobile-nav container"
 				aria-label="Menu di động"
 			>
-				<a href="index.html">Trang chủ</a>
+				<a href="/">Trang chủ</a>
+				<a href="about.html">Giới thiệu</a>
 				<a href="collection.html">Bộ sưu tập</a>
-				<a href="#process">Quy trình</a>
-				<a href="#quality">Cam kết</a>
-				<a href="#footer">Liên hệ</a>
+				<a href="contact.html">Liên hệ</a>
+				<a href="login.html" data-auth-link><span data-auth-label>Đăng nhập</span></a>
 			</nav>
 		</header>
 
@@ -205,19 +209,37 @@
 								<i class="fa-solid fa-gift" aria-hidden="true"></i>
 								Khám phá ngay
 							</a>
-							<a class="button button-secondary" href="#process">
+							<button class="button button-secondary" id="wow-play-video-btn" type="button" style="cursor: pointer;">
 								<i class="fa-solid fa-circle-play" aria-hidden="true"></i>
 								Xem cách chế tác
-							</a>
+							</button>
 						</div>
 					</div>
-					<figure class="wow-gift-media">
+					<figure class="wow-gift-media" style="cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center;">
+						<style>
+							.wow-gift-media::after {
+								content: "\f144";
+								font-family: "Font Awesome 6 Free";
+								font-weight: 900;
+								position: absolute;
+								font-size: 3.5rem;
+								color: rgba(255, 255, 255, 0.95);
+								text-shadow: 0 4px 12px rgba(0,0,0,0.45);
+								transition: all 0.3s ease;
+								z-index: 5;
+								pointer-events: none;
+							}
+							.wow-gift-media:hover::after {
+								transform: scale(1.1);
+								color: var(--brand-700);
+							}
+						</style>
 						<img
 							src="public/images/imgtext_1_videoimage.png"
 							alt="Bộ quà tặng pha lê khắc chân dung 3D đặt trong không gian phòng khách"
 							loading="lazy"
 						/>
-						<figcaption>
+						<figcaption style="pointer-events: none;">
 							<span>Pha lê cá nhân hóa</span>
 							<strong>Ảnh rõ - chữ sâu - quà gọn</strong>
 						</figcaption>
@@ -487,50 +509,63 @@
 				id="process"
 				class="section section-tint"
 				aria-labelledby="process-title"
+				style="background-color: #f8fafc;"
 			>
 				<div class="container">
-					<div class="section-heading">
-						<p class="eyebrow">Quy trình đặt hàng</p>
-						<h2 id="process-title">
-							Từ ảnh chân dung đến khối pha lê hoàn thiện
+					<div class="section-heading" style="text-align: center; margin-bottom: 40px;">
+						<p class="eyebrow" style="color: var(--brand-700); font-weight: 700; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 1px; margin-bottom: 8px;">Ý kiến khách hàng</p>
+						<h2 id="process-title" style="font-size: 2rem; font-weight: 700; text-transform: uppercase; color: var(--ink); margin: 0 0 12px 0;">
+							KHÁCH HÀNG ĐÃ NÓI GÌ
 						</h2>
-						<p>
-							Mỗi bước đều có điểm kiểm tra rõ ràng để sản phẩm cuối cùng đúng
-							người, đúng dịp và đúng thông điệp.
+						<p style="color: #64748b; font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+							Những đánh giá chân thực từ khách hàng đã trải nghiệm sản phẩm quà tặng pha lê 3D của chúng tôi.
 						</p>
 					</div>
-					<div class="process-grid">
-						<article class="step">
-							<span class="step-number">01</span>
-							<h3>Chọn mẫu</h3>
-							<p>
-								Lọc theo dáng khối, xem đủ ảnh sản phẩm, chọn kích thước và mức
-								giá phù hợp.
-							</p>
+					
+					<div class="reviews-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 2rem;">
+						<article class="review-card" style="background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 24px; display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; min-height: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+							<div style="flex: 1;">
+								<h4 class="review-author" style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700; color: var(--ink);">Minh Tú</h4>
+								<div class="review-rating" style="color: #fbbf24; margin-bottom: 12px; font-size: 0.9rem;">
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+								</div>
+								<p class="review-text" style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: #475569;">Sản phẩm chất lượng, giá cả hợp lý, giao hàng nhanh. Kiểu dáng độc đáo, sang trọng. Lại có khắc nội dung để tặng rất hay</p>
+							</div>
+							<img class="review-avatar" src="public/images/reviewer_minh_tu.png" alt="Minh Tú" style="width: 80px; height: 100px; object-fit: cover; border-radius: 4px; flex-shrink: 0;" />
 						</article>
-						<article class="step">
-							<span class="step-number">02</span>
-							<h3>Gửi nội dung</h3>
-							<p>
-								Nhập lời khắc, gửi ảnh chân dung và ghi chú dịp tặng để đội ngũ
-								dựng mẫu.
-							</p>
+
+						<article class="review-card" style="background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 24px; display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; min-height: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+							<div style="flex: 1;">
+								<h4 class="review-author" style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700; color: var(--ink);">Ngọc Bích</h4>
+								<div class="review-rating" style="color: #fbbf24; margin-bottom: 12px; font-size: 0.9rem;">
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+								</div>
+								<p class="review-text" style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: #475569;">Tới cửa hàng mới thấy choáng ngợp vì sản phẩm đẹp lung linh, nhân viên tư vấn nhiệt tình. Sẽ ủng hộ.</p>
+							</div>
+							<img class="review-avatar" src="public/images/reviewer_ngoc_bich.png" alt="Ngọc Bích" style="width: 80px; height: 100px; object-fit: cover; border-radius: 4px; flex-shrink: 0;" />
 						</article>
-						<article class="step">
-							<span class="step-number">03</span>
-							<h3>Duyệt thiết kế</h3>
-							<p>
-								Xem lại bố cục mô phỏng 3D trước khi xác nhận khắc laser trong
-								lòng pha lê.
-							</p>
-						</article>
-						<article class="step">
-							<span class="step-number">04</span>
-							<h3>Nhận quà</h3>
-							<p>
-								Hoàn thiện, đóng gói và giao hàng toàn quốc theo thông tin đặt
-								hàng của bạn.
-							</p>
+
+						<article class="review-card" style="background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 24px; display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; min-height: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+							<div style="flex: 1;">
+								<h4 class="review-author" style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700; color: var(--ink);">Thu Hằng</h4>
+								<div class="review-rating" style="color: #fbbf24; margin-bottom: 12px; font-size: 0.9rem;">
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+									<i class="fa-solid fa-star"></i>
+								</div>
+								<p class="review-text" style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: #475569;">Cửa hàng trưng bày sản phẩm rất đẹp mắt, nhân viên tư vấn nhiệt tình. Nhiều mẫu mã lạ mắt, sang trọng. Sẽ ủng hộ cửa hàng lâu dài.</p>
+							</div>
+							<img class="review-avatar" src="public/images/reviewer_thu_hang.png" alt="Thu Hằng" style="width: 80px; height: 100px; object-fit: cover; border-radius: 4px; flex-shrink: 0;" />
 						</article>
 					</div>
 				</div>
@@ -539,57 +574,86 @@
 
 		<footer id="footer" class="site-footer">
 			<div class="container footer-grid">
-				<section aria-labelledby="footer-brand">
-					<img
-						class="footer-logo"
-						src="public/logo.png"
-						alt="Quà Tặng Tinh Tế"
-					/>
-					<h2 id="footer-brand">Quà Tặng Tinh Tế</h2>
-					<p>
-						Chế tác pha lê khắc chân dung 3D bằng laser, tư vấn mẫu và cá nhân
-						hóa quà tặng theo từng dịp.
-					</p>
+				<section class="footer-info-col">
+					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" style="height: 42px; width: auto; object-fit: contain; margin-bottom: 1.25rem; filter: brightness(0) invert(1);" />
+					<div style="font-size: 0.88rem; line-height: 1.6; display: grid; gap: 0.6rem; color: rgba(255,255,255,0.72);">
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-location-dot" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Địa chỉ: CÔNG TY TNHH SX-TM-DV PHA LÊ VIỆT</strong><br>
+								<span style="font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+									- GPKD số 0304609065 cấp ngày 15/07/2022 tại Sở kế hoạch và Đầu tư TP.HCM<br>
+									- Showroom: 340/39 Quang Trung, P. Gò Vấp, TP. HCM.<br>
+									- Xưởng SX: 72 Vườn Lài, P. An Phú Đông, TP. HCM
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-clock" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Thời gian làm việc:</strong><br>
+								<span style="font-size: 0.85rem;">
+									Thứ 2 đến Thứ 7 (8h - 17h30)<br>
+									- Hotline: <a href="tel:0983833830" style="color: #3b92ab; font-weight: 700;">0983.83.38.30</a><br>
+									- NVKD 1: <a href="tel:0978848938" style="color: #3b92ab; font-weight: 700;">0978.848.938</a><br>
+									- NVKD 2: <a href="tel:0966782938" style="color: #3b92ab; font-weight: 700;">0966.782.938</a>
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-phone" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Số điện thoại: <a href="tel:0983833830" style="color: rgba(255,255,255,0.72);"><strong style="color: #fff;">0983833830</strong></a></span>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-envelope" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Email: <a href="mailto:quatangtinhte@phaleviet.vn" style="color: rgba(255,255,255,0.72);">quatangtinhte@phaleviet.vn</a></span>
+						</div>
+					</div>
 				</section>
-				<section aria-labelledby="footer-products">
-					<h3 id="footer-products">Dòng sản phẩm</h3>
-					<ul>
-						<li><a href="collection.html">Pha lê chữ nhật</a></li>
-						<li><a href="collection.html">Pha lê trái tim</a></li>
-						<li><a href="collection.html">Pha lê đa giác</a></li>
-						<li><a href="collection.html">Pha lê giọt nước</a></li>
+				<section aria-labelledby="footer-policies">
+					<h3 id="footer-policies" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Chính sách</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none;">
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách mua hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách giao hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách thanh toán</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách đổi trả</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách hoàn tiền</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách bảo mật</a></li>
 					</ul>
 				</section>
-				<section aria-labelledby="footer-service">
-					<h3 id="footer-service">Dịch vụ</h3>
-					<ul>
-						<li><a href="#process">Dựng mẫu 3D miễn phí</a></li>
-						<li><a href="#quality">Ảnh sản phẩm hiển thị đầy đủ</a></li>
-						<li><a href="cart.html">Đặt hàng qua giỏ hàng</a></li>
-						<li><a href="product.html?id=1">Xem sản phẩm tiêu biểu</a></li>
+				<section aria-labelledby="footer-links">
+					<h3 id="footer-links" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Liên kết trang</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none; margin-bottom: 1.5rem;">
+						<li><a href="/" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Trang chủ</a></li>
+						<li><a href="collection.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Sản phẩm</a></li>
+						<li><a href="about.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Giới thiệu</a></li>
+						<li><a href="contact.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Liên hệ</a></li>
 					</ul>
+					<div class="payment-methods" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Visa"><i class="fa-brands fa-cc-visa" style="color: #1a1f71; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Mastercard"><i class="fa-brands fa-cc-mastercard" style="color: #ea001b; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="MoMo"><span style="color: #a50064; font-weight: 800; font-family: sans-serif; font-size: 10px;">momo</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="ZaloPay"><span style="color: #008cfe; font-weight: 800; font-family: sans-serif; font-size: 10px;">ZaloPay</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="COD"><i class="fa-solid fa-truck" style="color: #475569; font-size: 14px;"></i></span>
+					</div>
 				</section>
-				<section aria-labelledby="footer-contact">
-					<h3 id="footer-contact">Liên hệ</h3>
-					<ul>
-						<li>Hotline: <a href="tel:0983833830">0983 833 830</a></li>
-						<li>
-							Email:
-							<a href="mailto:info@quatangtinhte.vn">info@quatangtinhte.vn</a>
-						</li>
-						<li>TP. Hồ Chí Minh, Việt Nam</li>
-					</ul>
+				<section aria-labelledby="footer-newsletter">
+					<h3 id="footer-newsletter" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Đăng ký nhận tin</h3>
+					<p style="font-size: 0.88rem; margin: 0 0 1rem; opacity: 0.85; color: rgba(255,255,255,0.72);">Bạn có muốn nhận khuyến mãi đặc biệt? Đăng ký ngay.</p>
+					<form onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã đăng ký!'); this.reset();" style="display: flex; border-radius: 99px; background: #fff; overflow: hidden; padding: 2px; border: 1px solid rgba(255,255,255,0.15); max-width: 320px;">
+						<input type="email" required placeholder="Nhập địa chỉ email" style="flex: 1; border: 0; padding: 0.5rem 0.85rem; font-size: 0.85rem; outline: none; background: transparent; color: #1e293b;" />
+						<button type="submit" style="background: #143944; color: #fff; border: 0; border-radius: 99px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0;" onmouseover="this.style.background='#245f70'" onmouseout="this.style.background='#143944'">Đăng ký</button>
+					</form>
 				</section>
 			</div>
-			<div class="container footer-bottom">
-				<span>© 2026 Quà Tặng Tinh Tế. Bảo lưu mọi quyền.</span>
-				<span>Pha lê K9 - Khắc laser 3D - Cá nhân hóa theo yêu cầu</span>
+			<div class="container footer-bottom" style="font-size: 0.82rem; color: rgba(255,255,255,0.55); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 1.2rem 0;">
+				<span>© Bản quyền thuộc về Quà Tặng Tinh Tế</span>
 			</div>
 		</footer>
 
-		<script src="data/products.js"></script>
+		<script src="static-client.js"></script>
 		<script>
-			const productsData = window.PRODUCTS_DATA || [];
+			let productsData = [];
 			const collectionGroups = document.getElementById("collection-groups");
 			const newProductGrid = document.getElementById("new-product-grid");
 			const recommendedProductGrid = document.getElementById(
@@ -646,18 +710,24 @@
 			}
 
 			function productCardTemplate(product) {
+				const detailUrl = StaticStorefront.productUrl(product);
 				return `
-					<article class="product-card">
-						<a class="product-media" href="product.html?id=${product.id}" aria-label="Xem chi tiết ${product.title}">
+					<article class="product-card" style="position: relative;">
+						<a class="product-media" href="${detailUrl}" aria-label="Xem chi tiết ${product.title}">
 							<img src="${product.imageUrl}" alt="${product.title}" loading="lazy" referrerpolicy="no-referrer" />
 						</a>
+						${StaticStorefront.canEditProducts() ? `
+							<button class="quick-edit-product-btn" onclick="event.preventDefault(); event.stopPropagation(); StaticStorefront.openQuickProductEditor(${product.id}, () => window.location.reload())" title="Sửa nhanh sản phẩm" style="position: absolute; top: 12px; right: 12px; z-index: 10; width: 32px; height: 32px; border-radius: 50%; background: rgba(15, 23, 42, 0.8); color: #fff; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#0f766e'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='rgba(15, 23, 42, 0.8)'; this.style.transform='scale(1)';">
+								<i class="fa-solid fa-pencil" style="font-size: 13px;"></i>
+							</button>
+						` : ''}
 						<div class="product-body">
 							<div class="product-meta">
 								<span>${product.brand}</span>
 								<span>${product.category}</span>
 								<span>${product.variants.length} lựa chọn</span>
 							</div>
-							<h3><a href="product.html?id=${product.id}">${product.title}</a></h3>
+							<h3><a href="${detailUrl}">${product.title}</a></h3>
 							<div class="price-line">
 								<span>Giá từ</span>
 								<strong>${priceLabel(product)}</strong>
@@ -683,6 +753,7 @@
 				const variant = product.variants[0];
 				const cartItem = {
 					productId: product.id,
+					slug: product.slug,
 					title: product.title,
 					sku: variant.sku,
 					variantTitle: variant.title,
@@ -786,7 +857,7 @@
 					itemListElement: productsData.slice(0, 12).map((product, index) => ({
 						"@type": "ListItem",
 						position: index + 1,
-						url: `https://quatangtinhte.vn/product.html?id=${product.id}`,
+						url: `https://quatangtinhte.vn/${StaticStorefront.productUrl(product)}`,
 						name: product.title,
 					})),
 				});
@@ -824,7 +895,7 @@
 				}
 			});
 
-			collectionGroups.addEventListener("click", (event) => {
+			collectionGroups.addEventListener("click", async (event) => {
 				const buyButton = event.target.closest(".product-buy-now");
 				const cartButton = event.target.closest(".product-add-cart");
 				if (!buyButton && !cartButton) return;
@@ -856,10 +927,110 @@
 					document.body.classList.toggle("menu-open", isOpen);
 				});
 
-			renderFilters();
-			renderProducts();
-			injectItemListSchema();
-			updateCartBadge();
+			function setupWowVideo() {
+				const media = document.querySelector(".wow-gift-media");
+				const playBtn = document.getElementById("wow-play-video-btn");
+				if (!media) return;
+
+				const settings = window.APP_SETTINGS || {};
+				const wow = settings.home_sections?.wow_gift || {};
+				const mediaType = wow.media_type || "video";
+				const rawVideoUrl = wow.video_url || "https://www.youtube.com/watch?v=8x87TxOHXmo";
+
+				let videoId = "8x87TxOHXmo";
+				const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
+				const match = rawVideoUrl.match(ytRegex);
+				if (match && match[1]) {
+					videoId = match[1];
+				}
+
+				const isCurrentlyPlaying = !!media.querySelector("iframe");
+
+				if (mediaType === "image") {
+					media.style.cursor = "default";
+					if (playBtn) playBtn.style.display = "none";
+					
+					// If it was playing, restore image view
+					if (isCurrentlyPlaying) {
+						media.innerHTML = `
+							<img src="${wow.image_url || 'public/images/imgtext_1_videoimage.png'}" alt="Bộ quà tặng pha lê" loading="lazy" />
+							<figcaption style="pointer-events: none;">
+								<span>${wow.caption_eyebrow || 'Pha lê cá nhân hóa'}</span>
+								<strong>${wow.caption_title || 'Ảnh rõ - chữ sâu - quà gọn'}</strong>
+							</figcaption>
+						`;
+						media.style.aspectRatio = "";
+					}
+					
+					let styleSheet = document.getElementById("wow-media-style-override");
+					if (!styleSheet) {
+						styleSheet = document.createElement("style");
+						styleSheet.id = "wow-media-style-override";
+						document.head.appendChild(styleSheet);
+					}
+					styleSheet.innerText = ".wow-gift-media::after { display: none !important; }";
+					return;
+				} else {
+					media.style.cursor = "pointer";
+					if (playBtn) playBtn.style.display = "";
+					
+					// If not playing, ensure preview elements are correct
+					if (!isCurrentlyPlaying) {
+						const img = media.querySelector("img");
+						if (img) img.src = wow.image_url || "public/images/imgtext_1_videoimage.png";
+						const figSpan = media.querySelector("figcaption span");
+						if (figSpan) figSpan.textContent = wow.caption_eyebrow || "Pha lê cá nhân hóa";
+						const figStrong = media.querySelector("figcaption strong");
+						if (figStrong) figStrong.textContent = wow.caption_title || "Ảnh rõ - chữ sâu - quà gọn";
+					}
+
+					const styleSheet = document.getElementById("wow-media-style-override");
+					if (styleSheet) styleSheet.remove();
+				}
+
+				const playVideo = (e) => {
+					if (e) e.preventDefault();
+					media.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" style="width: 100%; height: 100%; aspect-ratio: 16/9; border: 0; border-radius: var(--radius);" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+					media.style.aspectRatio = "16/9";
+					
+					const fig = media.querySelector("figcaption");
+					if (fig) fig.style.display = "none";
+					
+					let styleSheet = document.getElementById("wow-media-style-override");
+					if (!styleSheet) {
+						styleSheet = document.createElement("style");
+						styleSheet.id = "wow-media-style-override";
+						document.head.appendChild(styleSheet);
+					}
+					styleSheet.innerText = ".wow-gift-media::after { display: none !important; }";
+				};
+
+				// Remove old listeners to prevent stacking
+				media.onclick = null;
+				if (playBtn) playBtn.onclick = null;
+
+				media.onclick = playVideo;
+				if (playBtn) playBtn.onclick = playVideo;
+			}
+
+			async function initializeStorefront() {
+				StaticStorefront.mountAdminLoginButton(initializeStorefront);
+				await StaticStorefront.initHeroEditor();
+				await StaticStorefront.initSectionEditors();
+				productsData = await StaticStorefront.loadProducts();
+				renderFilters();
+				renderProducts();
+				injectItemListSchema();
+				updateCartBadge();
+				setupWowVideo();
+			}
+
+			initializeStorefront().catch((error) => {
+				console.error("Storefront init failed", error);
+				newProductGrid.innerHTML = `<div class="empty-state">Không tải được dữ liệu sản phẩm. ${error?.message || "Hãy kiểm tra backend/API."}</div>`;
+				recommendedProductGrid.innerHTML = "";
+				updateCartBadge();
+			});
 		</script>
 	</body>
 </html>

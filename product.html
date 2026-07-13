@@ -22,6 +22,625 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 		/>
 		<link rel="stylesheet" href="index.css" />
+		<style>
+			/* Inline Edit Mode Styles */
+			.inline-edit-toolbar {
+				position: sticky;
+				top: 0;
+				left: 0;
+				right: 0;
+				background: rgba(15, 23, 42, 0.95);
+				backdrop-filter: blur(10px);
+				color: #ffffff;
+				z-index: 10000;
+				padding: 10px 24px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				font-family: 'Quicksand', sans-serif;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+				border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			}
+			.inline-edit-toolbar p {
+				margin: 0;
+				font-size: 0.88rem;
+				font-weight: 700;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.inline-edit-toolbar .badge-dirty {
+				background: #e11d48;
+				color: #fff;
+				font-size: 0.72rem;
+				padding: 2px 8px;
+				border-radius: 99px;
+				font-weight: 800;
+			}
+			.inline-edit-toolbar .actions-group {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.inline-edit-toolbar button {
+				padding: 6px 12px;
+				border-radius: 8px;
+				font-size: 0.8rem;
+				font-weight: 700;
+				cursor: pointer;
+				border: 0;
+				transition: all 0.2s;
+			}
+			.inline-edit-toolbar .btn-save {
+				background: #10b981;
+				color: #fff;
+			}
+			.inline-edit-toolbar .btn-save:hover {
+				background: #059669;
+			}
+			.inline-edit-toolbar .btn-cancel {
+				background: #4b5563;
+				color: #fff;
+			}
+			.inline-edit-toolbar .btn-cancel:hover {
+				background: #374151;
+			}
+			.inline-edit-toolbar .btn-exit {
+				background: transparent;
+				color: #d4d4d8;
+				border: 1px solid #3f3f46;
+			}
+			.inline-edit-toolbar .btn-exit:hover {
+				color: #fff;
+				border-color: #a1a1aa;
+			}
+
+			/* Outline for editable areas */
+			.editable-area {
+				position: relative;
+				transition: all 0.2s;
+			}
+			.editable-area:hover {
+				outline: 1px dashed var(--brand-700) !important;
+				outline-offset: 4px;
+				cursor: text;
+			}
+			.editable-area:focus {
+				outline: 2px solid var(--brand-700) !important;
+				outline-offset: 4px;
+				background: rgba(59, 146, 171, 0.05);
+			}
+
+			/* Image Edit Overlay */
+			.editable-image-container {
+				position: relative;
+				cursor: pointer;
+			}
+			.editable-image-container::after {
+				content: "Thay ảnh";
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.6);
+				color: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				font-size: 0.9rem;
+				opacity: 0;
+				transition: opacity 0.2s;
+				border-radius: 12px;
+			}
+			.editable-image-container:hover::after {
+				opacity: 1;
+			}
+
+			/* Thumbnails with delete button */
+			.gallery-thumb-container {
+				position: relative;
+				display: inline-block;
+			}
+			.gallery-thumb-del {
+				position: absolute;
+				top: -4px;
+				right: -4px;
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				background: #ef4444;
+				color: #fff;
+				border: 0;
+				font-size: 10px;
+				font-weight: bold;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				z-index: 10;
+			}
+			.gallery-thumb-add {
+				width: 60px;
+				height: 60px;
+				border: 2px dashed #cbd5e1;
+				border-radius: 6px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: #64748b;
+				font-size: 20px;
+				transition: all 0.2s;
+			}
+			.gallery-thumb-add:hover {
+				border-color: var(--brand-700);
+				color: var(--brand-700);
+			}
+
+			/* Minimalist Luxury Layout Styles */
+			.product-detail {
+				display: grid;
+				grid-template-columns: 48% 52%;
+				gap: 48px;
+				margin-bottom: 3.5rem;
+				align-items: start;
+			}
+			@media (max-width: 991px) {
+				.product-detail {
+					grid-template-columns: 1fr;
+					gap: 32px;
+				}
+			}
+			.detail-gallery {
+				position: sticky;
+				top: 100px;
+				background: transparent;
+				border: 0;
+				padding: 0;
+				display: flex;
+				gap: 16px;
+				align-items: flex-start;
+			}
+			#media-viewport {
+				flex: 1;
+				aspect-ratio: 1;
+				border-radius: 16px;
+				overflow: hidden;
+				background: #ffffff;
+				border: 1px solid #e2e8f0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#media-viewport img {
+				width: 100%;
+				height: 100%;
+				object-fit: contain;
+				padding: 16px;
+			}
+			.gallery-thumbnails {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				flex-shrink: 0;
+				width: 64px;
+			}
+			@media (max-width: 767px) {
+				.detail-gallery {
+					flex-direction: column-reverse;
+					gap: 12px;
+				}
+				.gallery-thumbnails {
+					flex-direction: row;
+					width: 100%;
+					justify-content: center;
+					flex-wrap: wrap;
+				}
+			}
+			.gallery-thumb {
+				width: 64px;
+				height: 64px;
+				border-radius: 8px;
+				overflow: hidden;
+				cursor: pointer;
+				border: 1px solid #cbd5e1;
+			}
+			.gallery-thumb.active {
+				border-color: var(--brand-700) !important;
+				border-width: 2px;
+			}
+			.gallery-thumb img {
+				min-height: 0 !important;
+				height: 100% !important;
+				object-fit: cover !important;
+			}
+			.product-page .detail-gallery {
+				background: transparent !important;
+				border: 0 !important;
+				box-shadow: none !important;
+			}
+
+			.detail-info {
+				display: flex;
+				flex-direction: column;
+				gap: 24px;
+			}
+			.product-summary {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				border-bottom: 1px solid #e2e8f0;
+				padding-bottom: 20px;
+			}
+			.product-summary .eyebrow {
+				font-size: 0.85rem;
+				font-weight: 700;
+				color: var(--brand-700);
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				margin: 0;
+			}
+			.product-summary h1 {
+				font-size: clamp(1.6rem, 3vw, 2.1rem);
+				line-height: 1.3;
+				color: var(--brand-900);
+				font-weight: 700;
+				margin: 0;
+			}
+			.product-summary .product-meta-line {
+				display: flex;
+				gap: 16px;
+				font-size: 0.88rem;
+				color: var(--muted);
+				margin: 0;
+			}
+			.price-display-wrapper {
+				display: flex;
+				align-items: baseline;
+				gap: 12px;
+				margin-top: 4px;
+				flex-wrap: wrap;
+			}
+			.detail-price {
+				font-size: 1.75rem !important;
+				font-weight: 700;
+				color: var(--brand-900);
+			}
+			.original-price {
+				font-size: 1.1rem;
+				color: var(--muted);
+				text-decoration: line-through;
+				font-weight: 500;
+			}
+			.discount-badge {
+				background: #ffe4e6;
+				color: #e11d48;
+				font-size: 0.75rem;
+				font-weight: 700;
+				padding: 3px 8px;
+				border-radius: 4px;
+			}
+			.stock-status {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 0.88rem;
+				font-weight: 700;
+				color: #10b981;
+			}
+			.stock-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background-color: #10b981;
+				display: inline-block;
+			}
+
+			.variant-list {
+				display: flex;
+				flex-direction: column;
+				gap: 16px;
+				padding: 0 0 20px 0;
+				background: transparent;
+				border-bottom: 1px solid #e2e8f0;
+			}
+			.variant-group {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			.variant-label {
+				font-size: 0.88rem;
+				font-weight: 700;
+				color: var(--ink);
+				margin: 0;
+			}
+			.variant-label strong {
+				color: var(--brand-700);
+			}
+			.variant-options {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+			}
+			.variant-choice {
+				padding: 8px 16px;
+				border-radius: 4px;
+				border: 1px solid #cbd5e1;
+				background: #ffffff;
+				color: var(--ink);
+				font-weight: 600;
+				font-size: 0.85rem;
+				cursor: pointer;
+				position: relative;
+			}
+			.variant-choice[aria-pressed="true"] {
+				border-color: var(--brand-700);
+				background: #ffffff;
+				color: var(--brand-900);
+			}
+			.variant-choice[aria-pressed="true"]::after {
+				content: "";
+				position: absolute;
+				top: -1px;
+				right: -1px;
+				width: 14px;
+				height: 14px;
+				background: var(--brand-700);
+				clip-path: polygon(100% 0, 0 0, 100% 100%);
+				border-top-right-radius: 3px;
+			}
+			.variant-choice[aria-pressed="true"]::before {
+				content: "✓";
+				position: absolute;
+				top: -1px;
+				right: 1px;
+				color: #ffffff;
+				font-size: 8px;
+				font-weight: bold;
+				z-index: 1;
+			}
+
+			/* Personalization Box */
+			.customize-card {
+				background: #f8fafc;
+				border-radius: 8px;
+				padding: 20px;
+				border: 1px solid #e2e8f0;
+			}
+			.customize-title {
+				font-size: 0.9rem;
+				font-weight: 700;
+				color: var(--brand-900);
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-bottom: 16px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.form-field {
+				margin-bottom: 16px;
+			}
+			.form-field:last-child {
+				margin-bottom: 0;
+			}
+			.form-field label {
+				display: block;
+				font-weight: 700;
+				font-size: 0.85rem;
+				margin-bottom: 6px;
+				color: var(--ink);
+			}
+			.form-field input[type="text"],
+			.form-field input:not([type]) {
+				width: 100%;
+				height: 44px;
+				padding: 0 12px;
+				border: 1px solid #cbd5e1;
+				border-radius: 4px;
+				font-size: 0.88rem;
+				outline: none;
+				font-family: inherit;
+			}
+			.form-field input[type="text"]:focus,
+			.form-field input:not([type]):focus {
+				border-color: var(--brand-700);
+			}
+			/* Dropzone Upload UI */
+			.upload-dropzone {
+				border: 1px dashed #cbd5e1;
+				border-radius: 6px;
+				padding: 16px;
+				text-align: center;
+				cursor: pointer;
+				background: #ffffff;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+			}
+			.upload-dropzone:hover {
+				border-color: var(--brand-700);
+			}
+			.upload-dropzone i {
+				font-size: 24px;
+				color: var(--brand-700);
+			}
+			.upload-dropzone-text {
+				font-size: 0.85rem;
+				font-weight: 700;
+				color: var(--ink);
+			}
+			.upload-dropzone-hint {
+				font-size: 0.78rem;
+				color: var(--muted);
+			}
+			.upload-preview-container {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-top: 12px;
+				padding: 8px;
+				border: 1px solid #cbd5e1;
+				border-radius: 4px;
+				background: #fff;
+				width: 100%;
+			}
+			.upload-preview-img {
+				width: 44px;
+				height: 44px;
+				object-fit: cover;
+				border-radius: 4px;
+				border: 1px solid #cbd5e1;
+			}
+			.upload-preview-info {
+				flex: 1;
+				font-size: 0.82rem;
+				color: var(--ink);
+				font-weight: 600;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				text-align: left;
+			}
+			.upload-preview-remove {
+				color: #ef4444;
+				cursor: pointer;
+				font-size: 1.1rem;
+				padding: 0 8px;
+				background: none;
+				border: 0;
+			}
+
+			/* Quantity & Actions */
+			.action-row {
+				display: flex;
+				gap: 12px;
+				align-items: center;
+				margin-top: 8px;
+				border-top: 1px solid #e2e8f0;
+				padding-top: 20px;
+			}
+			.qty-selector {
+				display: flex;
+				align-items: center;
+				height: 48px;
+				border: 1px solid #cbd5e1;
+				border-radius: 4px;
+				overflow: hidden;
+				background: #fff;
+				width: 120px;
+				justify-content: space-between;
+			}
+			.qty-selector button {
+				width: 38px;
+				height: 100%;
+				background: none;
+				border: 0;
+				font-size: 1.1rem;
+				font-weight: bold;
+				cursor: pointer;
+				color: var(--ink);
+			}
+			.qty-selector button:hover {
+				background: #f1f5f9;
+			}
+			.qty-selector span {
+				font-size: 1rem;
+				font-weight: 700;
+				color: var(--ink);
+			}
+			.btn-buy {
+				height: 48px;
+				flex: 1;
+				border-radius: 4px;
+				font-size: 0.95rem;
+				font-weight: 700;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				border: 0;
+			}
+			.btn-add-to-cart {
+				background: #ffffff;
+				border: 1px solid var(--brand-700);
+				color: var(--brand-700);
+			}
+			.btn-add-to-cart:hover {
+				background: var(--surface-soft);
+			}
+			.btn-buy-now {
+				background: var(--brand-700);
+				color: #ffffff;
+			}
+			.btn-buy-now:hover {
+				background: var(--brand-800);
+			}
+			.btn-buy:disabled {
+				background: #e2e8f0 !important;
+				color: #94a3b8 !important;
+				cursor: not-allowed !important;
+				border: 0 !important;
+			}
+
+			/* Sticky CTA for Mobile */
+			.mobile-sticky-cta {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: #ffffff;
+				border-top: 1px solid #e2e8f0;
+				padding: 12px 16px;
+				display: none;
+				z-index: 9999;
+				gap: 12px;
+				align-items: center;
+				justify-content: space-between;
+			}
+			@media (max-width: 767px) {
+				.mobile-sticky-cta {
+					display: flex;
+				}
+				body {
+					padding-bottom: 74px;
+				}
+			}
+			.mobile-sticky-price {
+				display: flex;
+				flex-direction: column;
+			}
+			.mobile-sticky-price span {
+				font-size: 0.72rem;
+				color: var(--muted);
+				font-weight: 700;
+				text-transform: uppercase;
+			}
+			.mobile-sticky-price strong {
+				font-size: 1.15rem;
+				color: var(--brand-900);
+				font-weight: 700;
+			}
+			.mobile-sticky-buttons {
+				display: flex;
+				gap: 8px;
+				flex: 1;
+				justify-content: flex-end;
+			}
+			.mobile-sticky-buttons button {
+				height: 42px;
+				border-radius: 4px;
+				font-size: 0.85rem;
+				font-weight: 700;
+				border: 0;
+				padding: 0 16px;
+				cursor: pointer;
+			}
+		</style>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">Bỏ qua để đến nội dung chính</a>
@@ -32,20 +651,33 @@
 
 		<header class="site-header">
 			<div class="container nav-shell">
-				<a class="brand-link" href="index.html" aria-label="Trang chủ Quà Tặng Tinh Tế">
+				<a class="brand-link" href="/" aria-label="Trang chủ Quà Tặng Tinh Tế">
 					<img class="brand-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
 				</a>
 				<nav class="desktop-nav" aria-label="Menu chính">
-					<a href="index.html">Trang chủ</a>
+					<a href="/">Trang chủ</a>
+					<a href="about.html">Giới thiệu</a>
 					<a href="collection.html">Bộ sưu tập</a>
-					<a href="index.html#process">Quy trình</a>
-					<a href="index.html#quality">Cam kết</a>
-					<a href="#footer">Liên hệ</a>
+					<a href="contact.html">Liên hệ</a>
 				</nav>
 				<div class="header-actions">
+					<label class="search-field" for="search-input">
+						<span class="sr-only">Tìm sản phẩm pha lê</span>
+						<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+						<input
+							id="search-input"
+							type="search"
+							placeholder="Tìm mẫu pha lê..."
+							autocomplete="off"
+						/>
+					</label>
 					<a class="icon-button" href="cart.html" aria-label="Xem giỏ hàng">
 						<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
 						<span id="cart-badge" class="cart-badge">0</span>
+					</a>
+					<a class="icon-button" href="login.html" data-auth-link aria-label="Đăng nhập tài khoản">
+						<i class="fa-solid fa-user" aria-hidden="true"></i>
+						<span class="sr-only" data-auth-label>Đăng nhập</span>
 					</a>
 					<button class="icon-button menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Mở menu">
 						<i class="fa-solid fa-bars" aria-hidden="true"></i>
@@ -53,21 +685,22 @@
 				</div>
 			</div>
 			<nav id="mobile-nav" class="mobile-nav container" aria-label="Menu di động">
-				<a href="index.html">Trang chủ</a>
+				<a href="/">Trang chủ</a>
+				<a href="about.html">Giới thiệu</a>
 				<a href="collection.html">Bộ sưu tập</a>
-				<a href="index.html#process">Quy trình</a>
-				<a href="index.html#quality">Cam kết</a>
-				<a href="#footer">Liên hệ</a>
+				<a href="contact.html">Liên hệ</a>
+				<a href="login.html" data-auth-link><span data-auth-label>Đăng nhập</span></a>
 			</nav>
 		</header>
 
-		<main id="main-content" class="section section-tint product-page">
+		<main id="main-content" class="section product-page">
 			<div class="container">
-				<nav class="breadcrumb" aria-label="Breadcrumb">
-					<a href="collection.html">
-						<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-						Quay lại bộ sưu tập
-					</a>
+				<nav class="breadcrumb" aria-label="Breadcrumb" style="font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 600; margin-bottom: 24px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+					<a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-house" style="font-size: 0.8rem;"></i> Trang chủ</a>
+					<span>/</span>
+					<a href="collection.html" style="text-decoration: none; color: inherit;">Sản phẩm</a>
+					<span>/</span>
+					<span id="breadcrumb-category" style="color: inherit; display: flex; align-items: center; gap: 8px;">Chi tiết</span>
 				</nav>
 				<div id="product-container" class="product-detail" aria-live="polite">
 					<div class="empty-state">Đang tải chi tiết sản phẩm...</div>
@@ -75,111 +708,112 @@
 			</div>
 		</main>
 
-		<section class="section section-tint" aria-labelledby="service-title">
-			<div class="container">
-				<div class="section-heading">
-					<p class="eyebrow">Dịch vụ đi kèm</p>
-					<h2 id="service-title">Hoàn thiện món quà trước khi trao tận tay.</h2>
-					<p>Thông tin khắc và ảnh chân dung được lưu cùng giỏ hàng để đội ngũ tư vấn xác nhận lại trước khi sản xuất.</p>
-				</div>
-				<div class="promise-grid">
-					<article class="promise">
-						<i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-						<h3>Bảo hành vận chuyển</h3>
-						<p>Hỗ trợ đổi mới khi sản phẩm nứt vỡ do vận chuyển hoặc không đúng mẫu đã duyệt.</p>
-					</article>
-					<article class="promise">
-						<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
-						<h3>Dựng mẫu miễn phí</h3>
-						<p>Ảnh chân dung được chuyển thành bố cục 3D phù hợp với dáng pha lê đã chọn.</p>
-					</article>
-					<article class="promise">
-						<i class="fa-solid fa-gift" aria-hidden="true"></i>
-						<h3>Đóng gói tặng phẩm</h3>
-						<p>Tư vấn hộp quà, thiệp viết tay và phụ kiện theo dịp tặng của bạn.</p>
-					</article>
-				</div>
-			</div>
-		</section>
-
 		<footer id="footer" class="site-footer">
 			<div class="container footer-grid">
-				<section aria-labelledby="footer-brand">
-					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
-					<h2 id="footer-brand">Quà Tặng Tinh Tế</h2>
-					<p>Chế tác pha lê khắc chân dung 3D bằng laser, tư vấn mẫu và cá nhân hóa quà tặng theo từng dịp.</p>
+				<section class="footer-info-col">
+					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" style="height: 42px; width: auto; object-fit: contain; margin-bottom: 1.25rem; filter: brightness(0) invert(1);" />
+					<div style="font-size: 0.88rem; line-height: 1.6; display: grid; gap: 0.6rem; color: rgba(255,255,255,0.72);">
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-location-dot" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Địa chỉ: CÔNG TY TNHH SX-TM-DV PHA LÊ VIỆT</strong><br>
+								<span style="font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+									- GPKD số 0304609065 cấp ngày 15/07/2022 tại Sở kế hoạch và Đầu tư TP.HCM<br>
+									- Showroom: 340/39 Quang Trung, P. Gò Vấp, TP. HCM.<br>
+									- Xưởng SX: 72 Vườn Lài, P. An Phú Đông, TP. HCM
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-clock" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Thời gian làm việc:</strong><br>
+								<span style="font-size: 0.85rem;">
+									Thứ 2 đến Thứ 7 (8h - 17h30)<br>
+									- Hotline: <a href="tel:0983833830" style="color: #3b92ab; font-weight: 700;">0983.83.38.30</a><br>
+									- NVKD 1: <a href="tel:0978848938" style="color: #3b92ab; font-weight: 700;">0978.848.938</a><br>
+									- NVKD 2: <a href="tel:0966782938" style="color: #3b92ab; font-weight: 700;">0966.782.938</a>
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-phone" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Số điện thoại: <a href="tel:0983833830" style="color: rgba(255,255,255,0.72);"><strong style="color: #fff;">0983833830</strong></a></span>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-envelope" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Email: <a href="mailto:quatangtinhte@phaleviet.vn" style="color: rgba(255,255,255,0.72);">quatangtinhte@phaleviet.vn</a></span>
+						</div>
+					</div>
 				</section>
-				<section aria-labelledby="footer-products">
-					<h3 id="footer-products">Dòng sản phẩm</h3>
-					<ul>
-						<li><a href="collection.html">Pha lê chữ nhật</a></li>
-						<li><a href="collection.html">Pha lê trái tim</a></li>
-						<li><a href="collection.html">Pha lê đa giác</a></li>
-						<li><a href="collection.html">Pha lê giọt nước</a></li>
+				<section aria-labelledby="footer-policies">
+					<h3 id="footer-policies" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Chính sách</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none;">
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách mua hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách giao hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách thanh toán</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách đổi trả</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách hoàn tiền</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách bảo mật</a></li>
 					</ul>
 				</section>
-				<section aria-labelledby="footer-service">
-					<h3 id="footer-service">Dịch vụ</h3>
-					<ul>
-						<li><a href="index.html#process">Dựng mẫu 3D miễn phí</a></li>
-						<li><a href="index.html#quality">Ảnh sản phẩm hiển thị đầy đủ</a></li>
-						<li><a href="cart.html">Đặt hàng qua giỏ hàng</a></li>
-						<li><a href="index.html">Về trang chủ</a></li>
+				<section aria-labelledby="footer-links">
+					<h3 id="footer-links" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Liên kết trang</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none; margin-bottom: 1.5rem;">
+						<li><a href="/" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Trang chủ</a></li>
+						<li><a href="collection.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Sản phẩm</a></li>
+						<li><a href="about.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Giới thiệu</a></li>
+						<li><a href="contact.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Liên hệ</a></li>
 					</ul>
+					<div class="payment-methods" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Visa"><i class="fa-brands fa-cc-visa" style="color: #1a1f71; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Mastercard"><i class="fa-brands fa-cc-mastercard" style="color: #ea001b; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="MoMo"><span style="color: #a50064; font-weight: 800; font-family: sans-serif; font-size: 10px;">momo</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="ZaloPay"><span style="color: #008cfe; font-weight: 800; font-family: sans-serif; font-size: 10px;">ZaloPay</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="COD"><i class="fa-solid fa-truck" style="color: #475569; font-size: 14px;"></i></span>
+					</div>
 				</section>
-				<section aria-labelledby="footer-contact">
-					<h3 id="footer-contact">Liên hệ</h3>
-					<ul>
-						<li>Hotline: <a href="tel:0983833830">0983 833 830</a></li>
-						<li>Email: <a href="mailto:info@quatangtinhte.vn">info@quatangtinhte.vn</a></li>
-						<li>TP. Hồ Chí Minh, Việt Nam</li>
-					</ul>
+				<section aria-labelledby="footer-newsletter">
+					<h3 id="footer-newsletter" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Đăng ký nhận tin</h3>
+					<p style="font-size: 0.88rem; margin: 0 0 1rem; opacity: 0.85; color: rgba(255,255,255,0.72);">Bạn có muốn nhận khuyến mãi đặc biệt? Đăng ký ngay.</p>
+					<form onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã đăng ký!'); this.reset();" style="display: flex; border-radius: 99px; background: #fff; overflow: hidden; padding: 2px; border: 1px solid rgba(255,255,255,0.15); max-width: 320px;">
+						<input type="email" required placeholder="Nhập địa chỉ email" style="flex: 1; border: 0; padding: 0.5rem 0.85rem; font-size: 0.85rem; outline: none; background: transparent; color: #1e293b;" />
+						<button type="submit" style="background: #143944; color: #fff; border: 0; border-radius: 99px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0;" onmouseover="this.style.background='#245f70'" onmouseout="this.style.background='#143944'">Đăng ký</button>
+					</form>
 				</section>
 			</div>
-			<div class="container footer-bottom">
-				<span>© 2026 Quà Tặng Tinh Tế. Bảo lưu mọi quyền.</span>
-				<span>Pha lê K9 - Khắc laser 3D - Cá nhân hóa theo yêu cầu</span>
+			<div class="container footer-bottom" style="font-size: 0.82rem; color: rgba(255,255,255,0.55); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 1.2rem 0;">
+				<span>© Bản quyền thuộc về Quà Tặng Tinh Tế</span>
 			</div>
 		</footer>
 
-		<script src="data/products.js"></script>
+		<script src="static-client.js"></script>
 		<script>
-			const productsData = window.PRODUCTS_DATA || [];
 			const params = new URLSearchParams(window.location.search);
-			const productId = Number(params.get("id") || 1);
-			const product = productsData.find((item) => item.id === productId);
 			const container = document.getElementById("product-container");
+			let product = null;
 			let activeVariantIndex = 0;
 			let quantity = 1;
 			let uploadedImage = null;
+			let editModeActive = false;
+			let draftChanges = {};
 
 			function formatVND(amount) {
 				return new Intl.NumberFormat("vi-VN", {
 					style: "currency",
 					currency: "VND",
 					maximumFractionDigits: 0,
-				}).format(amount);
+				}).format(amount || 0);
 			}
 
 			function currentVariant() {
-				return product.variants[activeVariantIndex];
-			}
-
-			function priceRange(productItem) {
-				const prices = productItem.variants.map((variant) => variant.price).filter(Boolean);
-				const min = Math.min(...prices);
-				const max = Math.max(...prices);
-				return min === max ? formatVND(min) : `${formatVND(min)} - ${formatVND(max)}`;
+				return product.variants[activeVariantIndex] || product.variants[0];
 			}
 
 			function parseVariantTitle(title) {
 				const [sizePart, ...optionParts] = String(title || "").split("/");
 				const size = sizePart.trim();
-				let option = optionParts
-					.join("/")
-					.normalize("NFC")
-					.replace(/\s{2,}/g, " ")
-					.trim();
+				const option = optionParts.join("/").normalize("NFC").replace(/\s{2,}/g, " ").trim();
 				return { size, option };
 			}
 
@@ -235,17 +869,13 @@
 				return `
 					<div class="variant-list" id="variant-list">
 						<div class="variant-group">
-							<p class="variant-label">Kích thước: <strong>${activeInfo.size}</strong></p>
-							<div class="variant-options">${sizeButtons}</div>
+							<p class="variant-label">Kích thước: <strong>${activeInfo.size || "Mặc định"}</strong></p>
+							<div class="variant-options">${sizeButtons || variantChoiceButton("Mặc định", true, activeVariantIndex)}</div>
 						</div>
-						${
-							materialButtons
-								? `<div class="variant-group">
-									<p class="variant-label">Chất liệu: <strong>${activeInfo.option}</strong></p>
-									<div class="variant-options">${materialButtons}</div>
-								</div>`
-								: ""
-						}
+						${materialButtons ? `<div class="variant-group">
+							<p class="variant-label">Chất liệu: <strong>${activeInfo.option}</strong></p>
+							<div class="variant-options">${materialButtons}</div>
+						</div>` : ""}
 					</div>
 				`;
 			}
@@ -257,26 +887,18 @@
 
 			function setMeta(productItem) {
 				document.title = `${productItem.metaTitle || productItem.title} - Quà Tặng Tinh Tế`;
-				document.querySelector('meta[name="description"]').setAttribute("content", productItem.metaDescription);
-				document.querySelector('link[rel="canonical"]').setAttribute("href", `https://quatangtinhte.vn/product.html?id=${productItem.id}`);
+				document.querySelector('meta[name="description"]').setAttribute("content", productItem.metaDescription || productItem.title);
+				document.querySelector('link[rel="canonical"]').setAttribute("href", `https://quatangtinhte.vn/${StaticStorefront.productUrl(productItem)}`);
 				document.querySelector('meta[property="og:title"]').setAttribute("content", productItem.title);
-				document.querySelector('meta[property="og:description"]').setAttribute("content", productItem.metaDescription);
+				document.querySelector('meta[property="og:description"]').setAttribute("content", productItem.metaDescription || productItem.title);
 				document.querySelector('meta[property="og:image"]').setAttribute("content", productItem.imageUrl);
-
-				if (productItem.metaKeywords) {
-					let keywords = document.querySelector('meta[name="keywords"]');
-					if (!keywords) {
-						keywords = document.createElement("meta");
-						keywords.setAttribute("name", "keywords");
-						document.head.appendChild(keywords);
-					}
-					keywords.setAttribute("content", productItem.metaKeywords);
-				}
 			}
 
 			function injectProductSchema(productItem) {
+				document.getElementById("product-schema-db")?.remove();
 				const prices = productItem.variants.map((variant) => variant.price).filter(Boolean);
 				const script = document.createElement("script");
+				script.id = "product-schema-db";
 				script.type = "application/ld+json";
 				script.textContent = JSON.stringify({
 					"@context": "https://schema.org",
@@ -284,10 +906,7 @@
 					name: productItem.title,
 					image: [productItem.imageUrl],
 					description: productItem.metaDescription,
-					brand: {
-						"@type": "Brand",
-						name: productItem.brand,
-					},
+					brand: { "@type": "Brand", name: productItem.brand },
 					sku: productItem.variants[0]?.sku,
 					offers: {
 						"@type": "AggregateOffer",
@@ -296,10 +915,20 @@
 						highPrice: Math.max(...prices),
 						offerCount: productItem.variants.length,
 						availability: "https://schema.org/InStock",
-						url: `https://quatangtinhte.vn/product.html?id=${productItem.id}`,
+						url: `https://quatangtinhte.vn/${StaticStorefront.productUrl(productItem)}`,
 					},
 				});
 				document.head.appendChild(script);
+			}
+
+			function getEmbedVideoUrl(url) {
+				if (!url) return null;
+				const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
+				const match = url.match(ytRegex);
+				if (match && match[1]) {
+					return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1`;
+				}
+				return url;
 			}
 
 			function renderProduct() {
@@ -308,7 +937,7 @@
 					container.innerHTML = `
 						<div class="empty-state">
 							<h1>Không tìm thấy sản phẩm</h1>
-							<p>Sản phẩm không tồn tại trong dữ liệu Excel hiện tại.</p>
+							<p>Sản phẩm không tồn tại trong dữ liệu DB hiện tại.</p>
 							<a class="button button-primary" href="collection.html">Xem bộ sưu tập</a>
 						</div>
 					`;
@@ -316,60 +945,215 @@
 				}
 
 				const variant = currentVariant();
-				container.className = "product-detail";
-				container.innerHTML = `
-					<section class="detail-gallery" aria-label="Ảnh sản phẩm">
-						<img id="main-product-image" src="${variant.imageUrl || product.imageUrl}" alt="${product.title}" referrerpolicy="no-referrer" />
-					</section>
-					<section class="detail-info" aria-labelledby="product-title">
-						<div class="product-summary">
-							<p class="eyebrow">${product.brand} - ${product.category}</p>
-							<h1 id="product-title">${product.title}</h1>
-							<p class="product-meta-line">
-								<span>Thương hiệu: <b>${product.brand}</b></span>
-								<span>Mã sản phẩm: <b id="sku-display">${variant.sku}</b></span>
-							</p>
+				const editButton = StaticStorefront.canEditProducts() && !editModeActive
+					? `<button id="quick-edit-product" class="static-hero-edit" style="top: 0; right: 0;" type="button" title="Sửa sản phẩm" aria-label="Sửa sản phẩm"><i class="fa-solid fa-pencil" aria-hidden="true"></i></button>`
+					: "";
+
+				const hasVideo = !!product.video_url;
+				const currentGallery = draftChanges.gallery !== undefined ? draftChanges.gallery : (product.images && product.images.length > 0 ? product.images : (product.imageUrl ? [product.imageUrl] : []));
+				const mainImageUrl = currentGallery[0] || product.imageUrl || '';
+				let activeMediaHtml = `<img id="main-product-image" src="${mainImageUrl}" alt="${product.title}" referrerpolicy="no-referrer" />`;
+				
+				let gallerySelectorHtml = "";
+				const galleryItemsHtml = currentGallery.map((imgUrl, idx) => {
+					const activeBorder = idx === 0 ? "border: 2px solid var(--brand-700);" : "border: 2px solid #e2e8f0;";
+					return `
+						<div class="gallery-thumb-container" style="position: relative; display: inline-block;">
+							<div class="gallery-thumb ${idx === 0 ? 'active' : ''}" data-type="image" data-src="${imgUrl}" data-index="${idx}">
+								<img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;" />
+							</div>
+							${editModeActive ? `
+								<button type="button" class="gallery-thumb-del" data-index="${idx}" title="Xóa ảnh">&times;</button>
+							` : ''}
+						</div>
+					`;
+				}).join('');
+
+				const shouldShowThumbs = currentGallery.length > 1 || hasVideo || editModeActive;
+				if (hasVideo) {
+					gallerySelectorHtml = `
+						<div class="gallery-thumbnails" style="display: ${shouldShowThumbs ? 'flex' : 'none'};">
+							${galleryItemsHtml}
+							<div class="gallery-thumb" data-type="video" data-src="${product.video_url}" style="position: relative; background: #000; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #cbd5e1;">
+								<i class="fa-solid fa-play" style="color: #fff; font-size: 16px; position: absolute; z-index: 2;"></i>
+								<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;"></div>
+								<img src="${mainImageUrl}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;" />
+							</div>
+							${editModeActive ? `
+								<div class="gallery-thumb-add" title="Thêm ảnh vào album" style="width: 64px; height: 64px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 18px;">
+									<i class="fa-solid fa-plus"></i>
+								</div>
+							` : ''}
+						</div>
+					`;
+				} else {
+					gallerySelectorHtml = `
+						<div class="gallery-thumbnails" style="display: ${shouldShowThumbs ? 'flex' : 'none'};">
+							${galleryItemsHtml}
+							${editModeActive ? `
+								<div class="gallery-thumb-add" title="Thêm ảnh vào album" style="width: 64px; height: 64px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 18px;">
+									<i class="fa-solid fa-plus"></i>
+								</div>
+							` : ''}
+						</div>
+					`;
+				}
+
+				container.className = "";
+				const displayTitle = draftChanges.name !== undefined ? draftChanges.name : product.title;
+				const displayBrand = draftChanges.brand !== undefined ? draftChanges.brand : product.brand;
+
+				const bcCategory = document.getElementById("breadcrumb-category");
+				if (bcCategory) {
+					bcCategory.innerHTML = `<a href="collection.html?category=${encodeURIComponent(product.category)}" style="text-decoration: none; color: inherit;">${product.category}</a> <span>/</span> <span style="color: var(--brand-700); font-weight: 700;">${displayTitle}</span>`;
+				}
+
+				const hasComparePrice = variant.compare_at_price && variant.compare_at_price > variant.price;
+				const discountPercentage = hasComparePrice ? Math.round((1 - variant.price / variant.compare_at_price) * 100) : 0;
+				
+				const priceHtml = hasComparePrice
+					? `
+						<div class="price-display-wrapper">
+							<strong class="detail-price" id="price-display">${formatVND(variant.price)}</strong>
+							<span class="original-price">${formatVND(variant.compare_at_price)}</span>
+							<span class="discount-badge">-${discountPercentage}%</span>
+						</div>
+					`
+					: `
+						<div class="price-display-wrapper">
 							<strong class="detail-price" id="price-display">${formatVND(variant.price)}</strong>
 						</div>
+					`;
 
-						<div>
-							${variantPickerTemplate()}
+				container.innerHTML = `
+					<div class="product-detail">
+						<section class="detail-gallery" aria-label="Ảnh sản phẩm">
+							${gallerySelectorHtml}
+							<div id="media-viewport" class="${editModeActive ? 'editable-image-container' : ''}">
+								${activeMediaHtml}
+							</div>
+						</section>
+						<section class="detail-info" aria-labelledby="product-title" style="position: relative;">
+							${editButton}
+							<div class="product-summary">
+								<p class="eyebrow">${product.category}</p>
+								<h1 id="product-title" ${editModeActive ? 'contenteditable="true" data-field="title" class="editable-area"' : ''}>${displayTitle}</h1>
+								<p class="product-meta-line" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 0;">
+									<span>Thương hiệu: <b id="product-brand-editable" ${editModeActive ? 'contenteditable="true" data-field="brand" class="editable-area"' : ''}>${displayBrand}</b></span>
+									<span>Mã sản phẩm: <b id="sku-display">${variant.sku}</b></span>
+									<span>Số lượng: <b style="color: var(--brand-700); font-weight: 700;">${variant.stock > 0 ? `${variant.stock} sản phẩm` : 'Hết hàng'}</b></span>
+								</p>
+								
+								<div style="display: flex; align-items: center; gap: 16px; margin-top: 4px;">
+									${priceHtml}
+								</div>
+							</div>
+
+							<div>${variantPickerTemplate()}</div>
+
+							${product.is_customizable ? `
+							<form class="form-grid" id="customize-form" style="margin: 0; padding: 0; border: 0;" onsubmit="event.preventDefault();">
+								<div class="customize-card">
+									<div class="customize-title">
+										<i class="fa-solid fa-wand-magic-sparkles"></i> Tùy chọn thiết kế cá nhân hóa
+									</div>
+									<div class="form-field">
+										<label for="custom-engraving">Nội dung chữ cần in khắc</label>
+										<input type="text" id="custom-engraving" name="custom-engraving" maxlength="80" placeholder="Ví dụ: Mừng kỷ niệm 10 năm" />
+									</div>
+									<div class="form-field">
+										<label>Tải ảnh chân dung cần dựng 3D</label>
+										<input id="portrait-upload" name="portrait-upload" type="file" accept="image/*" style="display: none;" />
+										
+										<div id="dropzone-area" class="upload-dropzone">
+											<i class="fa-solid fa-cloud-arrow-up"></i>
+											<span class="upload-dropzone-text">Kéo thả ảnh hoặc click để tải lên</span>
+											<span class="upload-dropzone-hint">Ảnh rõ mặt sẽ cho kết quả dựng 3D đẹp hơn.</span>
+										</div>
+										
+										<div id="upload-preview-wrapper" style="display: ${uploadedImage ? 'block' : 'none'};">
+											<div class="upload-preview-container">
+												<img id="upload-preview-thumbnail" class="upload-preview-img" src="${uploadedImage ? uploadedImage.data : ''}" />
+												<span id="upload-preview-filename" class="upload-preview-info">${uploadedImage ? uploadedImage.name : ''}</span>
+												<button type="button" id="remove-upload-btn" class="upload-preview-remove" title="Xóa ảnh">&times;</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+							` : ''}
+
+							<div id="policy-benefits-block"></div>
+
+							<div class="action-row">
+								<div class="qty-selector" aria-label="Chọn số lượng">
+									<button type="button" id="qty-minus" aria-label="Giảm số lượng">-</button>
+									<span id="qty-number">${quantity}</span>
+									<button type="button" id="qty-plus" aria-label="Tăng số lượng">+</button>
+								</div>
+								
+								<button class="btn-buy btn-add-to-cart" id="add-to-cart" type="button" ${variant.stock === 0 ? 'disabled' : ''}>
+									<i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+								</button>
+								
+								<button class="btn-buy btn-buy-now" id="buy-now" type="button" ${variant.stock === 0 ? 'disabled' : ''}>
+									<i class="fa-solid fa-bag-shopping"></i> ${variant.stock === 0 ? 'Hết hàng' : 'Đặt ngay'}
+								</button>
+							</div>
+						</section>
+					</div>
+
+					<div id="product-tabs-block"></div>
+					
+					<div id="related-products-block" style="margin-top: 3.5rem;">
+						<h3 style="margin-bottom: 24px; font-size: 1.25rem; font-weight: 700; color: var(--brand-900); text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Quicksand', sans-serif;">Sản phẩm cùng phân khúc</h3>
+						<div id="related-products-container"></div>
+					</div>
+					
+					<div id="recently-viewed-block" style="margin-top: 3.5rem; display: none;">
+						<h3 style="margin-bottom: 24px; font-size: 1.25rem; font-weight: 700; color: var(--brand-900); text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Quicksand', sans-serif;">Sản phẩm đã xem</h3>
+						<div id="recently-viewed-container"></div>
+					</div>
+
+					<div class="mobile-sticky-cta">
+						<div class="mobile-sticky-price">
+							<span>Giá bán</span>
+							<strong>${formatVND(variant.price)}</strong>
 						</div>
-
-						<form class="form-grid" id="customize-form">
-							<div class="field">
-								<label for="custom-engraving">Chữ khắc hoặc lời nhắn</label>
-								<input id="custom-engraving" name="custom-engraving" maxlength="80" placeholder="Ví dụ: Mừng kỷ niệm 10 năm" />
-							</div>
-							<div class="field">
-								<label for="portrait-upload">Ảnh chân dung cần dựng 3D</label>
-								<input id="portrait-upload" name="portrait-upload" type="file" accept="image/*" />
-								<span id="upload-status"></span>
-							</div>
-						</form>
-
-						<div class="description-box">${product.description || product.metaDescription}</div>
-
-						<div class="card-actions detail-actions">
-							<div class="qty-control" aria-label="Chọn số lượng">
-								<button type="button" id="qty-minus" aria-label="Giảm số lượng">-</button>
-								<span id="qty-number">${quantity}</span>
-								<button type="button" id="qty-plus" aria-label="Tăng số lượng">+</button>
-							</div>
-							<button class="button button-secondary" id="add-to-cart" type="button">
-								<i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
-								Thêm vào giỏ
+						<div class="mobile-sticky-buttons">
+							<button class="btn-buy btn-add-to-cart" id="mobile-add-to-cart" type="button" ${variant.stock === 0 ? 'disabled' : ''} style="padding: 0 12px; height: 42px; width: 44px; display: flex; align-items: center; justify-content: center;">
+								<i class="fa-solid fa-cart-plus"></i>
 							</button>
-							<button class="button button-primary" id="buy-now" type="button">
-								<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
-								Đặt ngay
+							<button class="btn-buy btn-buy-now" id="mobile-buy-now" type="button" ${variant.stock === 0 ? 'disabled' : ''} style="height: 42px; padding: 0 20px;">
+								${variant.stock === 0 ? 'Hết hàng' : 'Đặt ngay'}
 							</button>
 						</div>
-						<p id="success-message" role="status" aria-live="polite"></p>
-					</section>
+					</div>
 				`;
 
 				bindProductEvents();
+				renderPolicyBenefits();
+				renderProductTabs();
+				loadRelatedProducts();
+				renderRecentlyViewed();
+			}
+
+			function handleUploadedFile(file) {
+				const reader = new FileReader();
+				reader.onload = () => {
+					uploadedImage = { name: file.name, data: reader.result };
+					
+					const previewWrapper = document.getElementById("upload-preview-wrapper");
+					const previewThumb = document.getElementById("upload-preview-thumbnail");
+					const previewFilename = document.getElementById("upload-preview-filename");
+					
+					if (previewWrapper && previewThumb && previewFilename) {
+						previewThumb.src = reader.result;
+						previewFilename.textContent = file.name;
+						previewWrapper.style.display = "block";
+					}
+				};
+				reader.readAsDataURL(file);
 			}
 
 			function bindProductEvents() {
@@ -390,29 +1174,153 @@
 					document.getElementById("qty-number").textContent = quantity;
 				});
 
-				document.getElementById("portrait-upload").addEventListener("change", (event) => {
-					const file = event.target.files[0];
-					if (!file) return;
-					const reader = new FileReader();
-					reader.onload = () => {
-						uploadedImage = {
-							name: file.name,
-							data: reader.result,
-						};
-						document.getElementById("upload-status").textContent = `Đã chọn ảnh: ${file.name}`;
-					};
-					reader.readAsDataURL(file);
+				if (product.is_customizable) {
+					const dropzone = document.getElementById("dropzone-area");
+					const uploadInput = document.getElementById("portrait-upload");
+					
+					dropzone?.addEventListener("click", () => {
+						uploadInput.click();
+					});
+
+					uploadInput?.addEventListener("change", (event) => {
+						const file = event.target.files[0];
+						if (file) {
+							handleUploadedFile(file);
+						}
+					});
+
+					dropzone?.addEventListener("dragover", (e) => {
+						e.preventDefault();
+						dropzone.style.borderColor = "var(--brand-700)";
+						dropzone.style.background = "var(--surface-soft)";
+					});
+					dropzone?.addEventListener("dragleave", () => {
+						dropzone.style.borderColor = "#cbd5e1";
+						dropzone.style.background = "#f8fafc";
+					});
+					dropzone?.addEventListener("drop", (e) => {
+						e.preventDefault();
+						dropzone.style.borderColor = "#cbd5e1";
+						dropzone.style.background = "#f8fafc";
+						const file = e.dataTransfer.files[0];
+						if (file && file.type.startsWith("image/")) {
+							handleUploadedFile(file);
+						}
+					});
+
+					document.getElementById("remove-upload-btn")?.addEventListener("click", (e) => {
+						e.stopPropagation();
+						uploadedImage = null;
+						document.getElementById("portrait-upload").value = "";
+						document.getElementById("upload-preview-wrapper").style.display = "none";
+					});
+				}
+
+				document.querySelectorAll(".gallery-thumb").forEach(thumb => {
+					thumb.addEventListener("click", () => {
+						document.querySelectorAll(".gallery-thumb").forEach(t => {
+							t.style.borderColor = "#e2e8f0";
+							t.classList.remove("active");
+						});
+						thumb.style.borderColor = "var(--brand-700)";
+						thumb.classList.add("active");
+
+						const type = thumb.dataset.type;
+						const src = thumb.dataset.src;
+						const viewport = document.getElementById("media-viewport");
+						if (type === "video") {
+							const embedUrl = getEmbedVideoUrl(src);
+							if (embedUrl.includes("youtube.com/embed")) {
+								viewport.innerHTML = `<iframe src="${embedUrl}" style="width: 100%; height: 100%; border: 0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+							} else {
+								viewport.innerHTML = `<video src="${src}" controls autoplay muted style="width: 100%; height: 100%; object-fit: contain;"></video>`;
+							}
+						} else {
+							viewport.innerHTML = `<img id="main-product-image" src="${src}" alt="${product.title}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: contain;" />`;
+						}
+					});
 				});
 
+				if (editModeActive) {
+					const titleEl = document.getElementById("product-title");
+					if (titleEl) {
+						titleEl.addEventListener("blur", () => {
+							draftChanges.name = titleEl.innerText.trim();
+							updateDirtyState();
+						});
+						titleEl.addEventListener("keydown", (e) => {
+							if (e.key === "Escape") {
+								titleEl.innerText = product.title;
+								titleEl.blur();
+							}
+							if (e.key === "Enter") {
+								e.preventDefault();
+								titleEl.blur();
+							}
+						});
+					}
+
+					const brandEl = document.getElementById("product-brand-editable");
+					if (brandEl) {
+						brandEl.addEventListener("blur", () => {
+							draftChanges.brand = brandEl.innerText.trim();
+							updateDirtyState();
+						});
+						brandEl.addEventListener("keydown", (e) => {
+							if (e.key === "Escape") {
+								brandEl.innerText = product.brand;
+								brandEl.blur();
+							}
+							if (e.key === "Enter") {
+								e.preventDefault();
+								brandEl.blur();
+							}
+						});
+					}
+
+					document.getElementById("media-viewport")?.addEventListener("click", () => {
+						triggerImageUploader(true);
+					});
+
+					document.querySelector(".gallery-thumb-add")?.addEventListener("click", (e) => {
+						e.stopPropagation();
+						triggerImageUploader(false);
+					});
+
+					document.querySelectorAll(".gallery-thumb-del").forEach(btn => {
+						btn.addEventListener("click", (e) => {
+							e.stopPropagation();
+							const index = parseInt(btn.dataset.index, 10);
+							deleteGalleryImage(index);
+						});
+					});
+				}
+
+				document.getElementById("quick-edit-product")?.addEventListener("click", () => {
+					editModeActive = true;
+					
+					const newParams = new URLSearchParams(window.location.search);
+					newParams.set("editmode", "true");
+					const newUrl = window.location.pathname + '?' + newParams.toString();
+					window.history.pushState({}, '', newUrl);
+
+					renderProduct();
+					renderEditToolbar();
+				});
 				document.getElementById("add-to-cart").addEventListener("click", () => addToCart(false));
 				document.getElementById("buy-now").addEventListener("click", () => addToCart(true));
+				document.getElementById("mobile-add-to-cart")?.addEventListener("click", () => addToCart(false));
+				document.getElementById("mobile-buy-now")?.addEventListener("click", () => addToCart(true));
 			}
 
 			function addToCart(redirect) {
 				const variant = currentVariant();
-				const customText = document.getElementById("custom-engraving").value.trim();
+				const customText = product.is_customizable && document.getElementById("custom-engraving") 
+					? document.getElementById("custom-engraving").value.trim() 
+					: "";
 				const cartItem = {
 					productId: product.id,
+					slug: product.slug,
 					title: product.title,
 					sku: variant.sku,
 					variantTitle: variant.title,
@@ -425,23 +1333,528 @@
 				};
 
 				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-				const existingIndex = cart.findIndex(
-					(item) =>
-						item.sku === cartItem.sku &&
-						item.customText === cartItem.customText &&
-						item.customImageName === cartItem.customImageName,
-				);
-				if (existingIndex >= 0) {
-					cart[existingIndex].quantity += cartItem.quantity;
-				} else {
-					cart.push(cartItem);
-				}
+				const existingIndex = cart.findIndex((item) => item.sku === cartItem.sku && item.customText === cartItem.customText && item.customImageName === cartItem.customImageName);
+				if (existingIndex >= 0) cart[existingIndex].quantity += cartItem.quantity;
+				else cart.push(cartItem);
 				localStorage.setItem("cart", JSON.stringify(cart));
 				updateCartBadge();
 
-				const message = document.getElementById("success-message");
-				message.textContent = "Đã thêm sản phẩm vào giỏ hàng.";
-				if (redirect) window.location.href = "cart.html#cart-checkout-section";
+				Swal.fire({
+					toast: true,
+					position: 'top-end',
+					timer: 500,
+					timerProgressBar: true,
+					showConfirmButton: false,
+					title: 'Đã thêm sản phẩm vào giỏ hàng',
+					icon: 'success'
+				});
+
+				if (redirect) {
+					setTimeout(() => {
+						window.location.href = "cart.html#cart-checkout-section";
+					}, 500);
+				}
+			}
+
+			function getDefaultPurchasePolicy() {
+				return `
+					<p><b>1. Hướng dẫn đặt hàng:</b> Quý khách chọn mẫu pha lê, kích thước phù hợp, nhập thông tin chữ cần khắc và tải ảnh chân dung. Bấm "Đặt ngay" hoặc "Thêm vào giỏ hàng" và điền địa chỉ giao hàng.</p>
+					<p><b>2. Thông tin thanh toán:</b> Hỗ trợ thanh toán chuyển khoản ngân hàng qua mã QR, ZaloPay, MoMo hoặc nhận hàng thanh toán (COD).</p>
+					<p><b>3. Thời gian xử lý đơn:</b> Đơn hàng sẽ được thiết kế dựng mẫu 3D và gửi quý khách duyệt trong vòng 12-24 giờ. Sau khi duyệt mẫu, thời gian sản xuất và đóng gói từ 1-2 ngày làm việc.</p>
+					<p><b>4. Giao hàng toàn quốc:</b> Giao hàng nhanh toàn quốc có bảo hiểm nứt vỡ trong quá trình vận chuyển.</p>
+				`;
+			}
+
+			function getDefaultReturnPolicy() {
+				return `
+					<p><b>1. Điều kiện đổi trả:</b> Hỗ trợ đổi trả sản phẩm mới 100% miễn phí trong vòng 7 ngày kể từ lúc nhận hàng nếu có lỗi từ nhà sản xuất hoặc nứt vỡ do vận chuyển.</p>
+					<p><b>2. Bảo hành do sản xuất/vận chuyển:</b> Trong trường hợp nứt vỡ, trầy xước bề mặt hoặc khắc không đúng bản thiết kế đã duyệt, Quý khách vui lòng chụp ảnh/video gửi hotline 0983 833 830 để được gửi sản phẩm mới nhanh chóng.</p>
+					<p><b>3. Sản phẩm đã cá nhân hóa:</b> Không hỗ trợ đổi trả hoặc hoàn tiền với các sản phẩm đã cá nhân hóa (khắc chân dung, khắc chữ riêng theo yêu cầu) nếu sản phẩm không có lỗi kỹ thuật hoặc không nứt vỡ.</p>
+					<p><b>4. Thời gian hỗ trợ:</b> Đội ngũ CSKH hỗ trợ xử lý khiếu nại đổi trả qua hotline/Zalo 24/7.</p>
+				`;
+			}
+
+			function renderPolicyBenefits() {
+				let currentPolicies = draftChanges.policy_benefits !== undefined ? draftChanges.policy_benefits : product.policy_benefits;
+				if (typeof currentPolicies === 'string') {
+					try {
+						currentPolicies = JSON.parse(currentPolicies);
+					} catch(e) {
+						currentPolicies = null;
+					}
+				}
+				if (!Array.isArray(currentPolicies) || currentPolicies.length === 0) {
+					currentPolicies = [
+						"Nhận in- khắc nội dung theo yêu cầu",
+						"Miễn phí vận chuyển từ 1.500k ( Nội thành TP.HCM)",
+						"Hỗ trợ gói quà miễn phí",
+						"Giá ưu đãi khi mua số lượng (liên hệ 0983833830)",
+						"Giao hàng toàn quốc"
+					];
+				}
+
+				const container = document.getElementById("policy-benefits-block");
+				if (!container) return;
+
+				container.innerHTML = `
+					<div class="policy-benefits-section" style="margin-top: 1.5rem; background: #ffffff; padding: 20px; border-radius: 8px; border: 2px dashed #b91c1c; font-family: 'Quicksand', sans-serif;">
+						<h3 style="margin: 0 0 16px; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
+							<span style="background: #b91c1c; color: #ffffff; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;"><i class="fa-solid fa-gift" style="font-size: 13px;"></i></span> CHÍNH SÁCH - ƯU ĐÃI
+						</h3>
+						<ul class="policy-list" style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; list-style-type: disc; color: #1e293b; font-size: 0.92rem; font-weight: 600;">
+							${currentPolicies.map((policy, idx) => `
+								<li class="policy-item" style="line-height: 1.5; outline: none; position: relative;">
+									<span class="policy-benefit-text" data-index="${idx}" ${editModeActive ? 'contenteditable="true"' : ''} style="outline: none; border-bottom: ${editModeActive ? '1px dashed #cbd5e1' : 'none'}; padding-bottom: 2px;">${policy}</span>
+									${editModeActive ? `
+										<button class="policy-benefit-del-btn" data-index="${idx}" style="background: none; border: 0; color: #ef4444; cursor: pointer; font-size: 0.8rem; padding: 2px 4px; position: absolute; right: 0; top: 0;" title="Xóa dòng chính sách"><i class="fa-solid fa-trash-can"></i></button>
+									` : ''}
+								</li>
+							`).join('')}
+						</ul>
+						${editModeActive ? `
+							<div style="margin-top: 16px; border-top: 1px dashed #e2e8f0; padding-top: 12px; display: flex; gap: 8px; align-items: center;">
+								<input id="new-policy-input" type="text" placeholder="Nhập thêm chính sách / ưu đãi mới..." style="flex: 1; padding: 6px 12px; font-size: 0.88rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit;" />
+								<button id="add-policy-btn" style="background: var(--brand-700); color: #fff; border: 0; padding: 6px 16px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; font-family: inherit;">+ Thêm</button>
+							</div>
+						` : ''}
+					</div>
+				`;
+
+				if (editModeActive) {
+					container.querySelector("#add-policy-btn")?.addEventListener("click", () => {
+						const input = container.querySelector("#new-policy-input");
+						const val = input.value.trim();
+						if (val) {
+							if (!draftChanges.policy_benefits) {
+								draftChanges.policy_benefits = [...currentPolicies];
+							}
+							draftChanges.policy_benefits.push(val);
+							renderPolicyBenefits();
+							updateDirtyState();
+						}
+					});
+
+					container.querySelectorAll(".policy-benefit-del-btn").forEach(btn => {
+						btn.addEventListener("click", () => {
+							const idx = parseInt(btn.dataset.index, 10);
+							if (!draftChanges.policy_benefits) {
+								draftChanges.policy_benefits = [...currentPolicies];
+							}
+							draftChanges.policy_benefits.splice(idx, 1);
+							renderPolicyBenefits();
+							updateDirtyState();
+						});
+					});
+
+					container.querySelectorAll(".policy-benefit-text").forEach(el => {
+						el.addEventListener("blur", () => {
+							const idx = parseInt(el.dataset.index, 10);
+							if (!draftChanges.policy_benefits) {
+								draftChanges.policy_benefits = [...currentPolicies];
+							}
+							draftChanges.policy_benefits[idx] = el.innerText.trim();
+							updateDirtyState();
+						});
+
+						el.addEventListener("keydown", (e) => {
+							if (e.key === "Escape") {
+								el.innerText = currentPolicies[parseInt(el.dataset.index, 10)];
+								el.blur();
+							}
+							if (e.key === "Enter") {
+								e.preventDefault();
+								el.blur();
+							}
+						});
+					});
+				}
+			}
+
+			function renderProductTabs() {
+				const container = document.getElementById("product-tabs-block");
+				if (!container) return;
+
+				const descContent = draftChanges.description !== undefined ? draftChanges.description : (product.description || 'Chưa có mô tả chi tiết sản phẩm.');
+				const purchaseContent = draftChanges.purchase_policy !== undefined ? draftChanges.purchase_policy : (product.purchase_policy || getDefaultPurchasePolicy());
+				const returnContent = draftChanges.return_policy !== undefined ? draftChanges.return_policy : (product.return_policy || getDefaultReturnPolicy());
+
+				container.innerHTML = `
+					<div class="product-tabs" style="margin-top: 3.5rem; background: transparent; padding: 24px 0 0 0; border: 0; font-family: 'Quicksand', sans-serif; border-top: 1px solid #e2e8f0;">
+						<div class="tabs-nav" style="display: flex; gap: 32px; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+							<button class="tab-nav-btn active" data-tab="desc" style="background: none; border: 0; padding: 12px 4px; font-weight: 700; font-size: 0.95rem; color: var(--brand-700); border-bottom: 2px solid var(--brand-700); cursor: pointer;">Mô tả chi tiết</button>
+							<button class="tab-nav-btn" data-tab="purchase" style="background: none; border: 0; padding: 12px 4px; font-weight: 600; font-size: 0.95rem; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer;">Chính sách mua hàng</button>
+							<button class="tab-nav-btn" data-tab="return" style="background: none; border: 0; padding: 12px 4px; font-weight: 600; font-size: 0.95rem; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer;">Chính sách đổi trả</button>
+						</div>
+						<div class="tabs-content" style="line-height: 1.6; font-size: 0.95rem; color: var(--ink);">
+							<div class="tab-pane active" id="pane-desc">
+								<div class="editable-tab-content description-box-editor" data-field="description" ${editModeActive ? 'contenteditable="true"' : ''} style="outline: none; min-height: 120px; border: ${editModeActive ? '1px dashed #cbd5e1' : 'none'}; padding: ${editModeActive ? '10px' : '0'}; border-radius: 4px;">
+									${descContent}
+								</div>
+							</div>
+							<div class="tab-pane" id="pane-purchase" style="display: none;">
+								<div class="editable-tab-content" data-field="purchase_policy" ${editModeActive ? 'contenteditable="true"' : ''} style="outline: none; min-height: 120px; border: ${editModeActive ? '1px dashed #cbd5e1' : 'none'}; padding: ${editModeActive ? '10px' : '0'}; border-radius: 4px;">
+									${purchaseContent}
+								</div>
+							</div>
+							<div class="tab-pane" id="pane-return" style="display: none;">
+								<div class="editable-tab-content" data-field="return_policy" ${editModeActive ? 'contenteditable="true"' : ''} style="outline: none; min-height: 120px; border: ${editModeActive ? '1px dashed #cbd5e1' : 'none'}; padding: ${editModeActive ? '10px' : '0'}; border-radius: 4px;">
+									${returnContent}
+								</div>
+							</div>
+						</div>
+					</div>
+				`;
+
+				container.querySelectorAll(".tab-nav-btn").forEach(btn => {
+					btn.addEventListener("click", () => {
+						container.querySelectorAll(".tab-nav-btn").forEach(b => {
+							b.classList.remove("active");
+							b.style.color = "#64748b";
+							b.style.borderBottomColor = "transparent";
+							b.style.fontWeight = "600";
+						});
+						btn.classList.add("active");
+						btn.style.color = "var(--brand-700)";
+						btn.style.borderBottomColor = "var(--brand-700)";
+						btn.style.fontWeight = "700";
+
+						const tab = btn.dataset.tab;
+						container.querySelectorAll(".tab-pane").forEach(pane => pane.style.display = "none");
+						container.querySelector(`#pane-${tab}`).style.display = "block";
+					});
+				});
+
+				if (editModeActive) {
+					container.querySelectorAll(".editable-tab-content").forEach(el => {
+						el.addEventListener("blur", () => {
+							const field = el.dataset.field;
+							draftChanges[field] = el.innerHTML.trim();
+							updateDirtyState();
+						});
+
+						el.addEventListener("keydown", (e) => {
+							if (e.key === "Escape") {
+								const field = el.dataset.field;
+								if (field === 'description') {
+									el.innerHTML = product.description || 'Chưa có mô tả chi tiết sản phẩm.';
+								} else if (field === 'purchase_policy') {
+									el.innerHTML = product.purchase_policy || getDefaultPurchasePolicy();
+								} else if (field === 'return_policy') {
+									el.innerHTML = product.return_policy || getDefaultReturnPolicy();
+								}
+								el.blur();
+							}
+						});
+					});
+				}
+			}
+
+			async function loadRelatedProducts() {
+				try {
+					const response = await StaticStorefront.fetchJson(`/api/products/${product.id}/related`);
+					const related = Array.isArray(response) ? response : (response.data || []);
+					renderRelatedProducts(related);
+				} catch (err) {
+					console.error("Failed to load related products:", err);
+				}
+			}
+
+			function renderRelatedProducts(list) {
+				const container = document.getElementById("related-products-container");
+				if (!container) return;
+				const block = document.getElementById("related-products-block");
+				if (list.length === 0) {
+					if (block) block.style.display = "none";
+					return;
+				}
+				if (block) block.style.display = "block";
+				container.innerHTML = `
+					<div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
+						${list.slice(0, 4).map(item => `
+							<a href="product.html?slug=${encodeURIComponent(item.slug)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+								<div style="aspect-ratio: 1; overflow: hidden; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+									<img src="${item.images?.[0] || item.imageUrl || 'public/images/slider_1.png'}" style="width: 100%; height: 100%; object-fit: contain; padding: 12px;" />
+								</div>
+								<div style="padding: 16px;">
+									<h4 style="margin: 0 0 6px; font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || item.title}</h4>
+									<p style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--brand-900);">${formatVND(item.price || item.base_price)}</p>
+								</div>
+							</a>
+						`).join('')}
+					</div>
+				`;
+			}
+
+			function saveToRecentlyViewed(p) {
+				if (!p) return;
+				let list = JSON.parse(localStorage.getItem('sly_recently_viewed') || '[]');
+				list = list.filter(item => item.id !== p.id);
+				list.unshift({
+					id: p.id,
+					title: p.title,
+					slug: p.slug,
+					imageUrl: p.imageUrl,
+					price: p.variants?.[0]?.price || p.price || p.base_price,
+				});
+				list = list.slice(0, 6);
+				localStorage.setItem('sly_recently_viewed', JSON.stringify(list));
+			}
+
+			function renderRecentlyViewed() {
+				let list = JSON.parse(localStorage.getItem('sly_recently_viewed') || '[]');
+				list = list.filter(item => item.id !== product.id);
+				
+				const container = document.getElementById('recently-viewed-container');
+				if (!container) return;
+				const block = document.getElementById("recently-viewed-block");
+				if (list.length === 0) {
+					if (block) block.style.display = "none";
+					return;
+				}
+				if (block) block.style.display = "block";
+				container.innerHTML = `
+					<div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
+						${list.map(item => `
+							<a href="product.html?slug=${encodeURIComponent(item.slug)}" class="product-card" style="text-decoration: none; color: inherit; display: block; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+								<div style="aspect-ratio: 1; overflow: hidden; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+									<img src="${item.imageUrl}" style="width: 100%; height: 100%; object-fit: contain; padding: 12px;" />
+								</div>
+								<div style="padding: 16px;">
+									<h4 style="margin: 0 0 6px; font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h4>
+									<p style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--brand-900);">${formatVND(item.price)}</p>
+								</div>
+							</a>
+						`).join('')}
+					</div>
+				`;
+			}
+
+			function getInitialGallery() {
+				if (draftChanges.gallery) return draftChanges.gallery;
+				return product.images && product.images.length > 0
+					? [...product.images]
+					: (product.imageUrl ? [product.imageUrl] : []);
+			}
+
+			async function triggerImageUploader(replaceMain = false) {
+				const input = document.createElement("input");
+				input.type = "file";
+				input.accept = "image/*";
+				input.onchange = async (e) => {
+					const file = e.target.files[0];
+					if (!file) return;
+
+					Swal.fire({
+						title: 'Đang tải ảnh lên...',
+						allowOutsideClick: false,
+						didOpen: () => {
+							Swal.showLoading();
+						}
+					});
+
+					try {
+						const token = StaticStorefront.getAdminToken();
+						const formData = new FormData();
+						formData.append("file", file);
+						formData.append("type", "sp");
+
+						const response = await fetch(`${StaticStorefront.API_BASE}/api/admin/images/upload`, {
+							method: "POST",
+							headers: {
+								"Authorization": `Bearer ${token}`,
+								"X-Authorization": `Bearer ${token}`
+							},
+							body: formData
+						});
+
+						const result = await response.json();
+						Swal.close();
+
+						if (!response.ok || !result.success) {
+							throw new Error(result.error || "Lỗi tải lên ảnh.");
+						}
+
+						const uploadedUrl = result.data.url;
+						draftChanges.gallery = getInitialGallery();
+
+						if (replaceMain) {
+							draftChanges.gallery[0] = uploadedUrl;
+						} else {
+							draftChanges.gallery.push(uploadedUrl);
+						}
+
+						renderProduct();
+						updateDirtyState();
+
+						Swal.fire({
+							toast: true,
+							position: 'top-end',
+							timer: 1500,
+							timerProgressBar: true,
+							showConfirmButton: false,
+							title: 'Đã tải lên ảnh thành công',
+							icon: 'success'
+						});
+					} catch (err) {
+						Swal.fire({
+							title: 'Lỗi tải ảnh',
+							text: err.message || 'Không thể upload ảnh lên máy chủ.',
+							icon: 'error'
+						});
+					}
+				};
+				input.click();
+			}
+
+			function deleteGalleryImage(index) {
+				draftChanges.gallery = getInitialGallery();
+				draftChanges.gallery.splice(index, 1);
+				renderProduct();
+				updateDirtyState();
+			}
+
+			function renderEditToolbar() {
+				document.getElementById("sly-inline-edit-toolbar")?.remove();
+				if (!editModeActive) return;
+
+				const toolbar = document.createElement("div");
+				toolbar.id = "sly-inline-edit-toolbar";
+				toolbar.className = "inline-edit-toolbar";
+				
+				const isDirty = Object.keys(draftChanges).length > 0;
+				const dirtyBadge = isDirty ? `<span class="badge-dirty">Có thay đổi chưa lưu</span>` : '';
+
+				toolbar.innerHTML = `
+					<p style="margin:0; font-size:0.88rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+						<i class="fa-solid fa-pen-to-square"></i> Bạn đang chỉnh sửa sản phẩm ${dirtyBadge}
+					</p>
+					<div class="actions-group" style="display:flex; align-items:center; gap:8px;">
+						<button class="btn-save" id="sly-save-inline-btn" ${!isDirty ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Lưu thay đổi</button>
+						<button class="btn-cancel" id="sly-cancel-inline-btn">Hủy</button>
+						<button class="btn-exit" id="sly-exit-inline-btn">Thoát edit mode</button>
+					</div>
+				`;
+				document.body.prepend(toolbar);
+
+				toolbar.querySelector("#sly-save-inline-btn").addEventListener("click", saveInlineChanges);
+				toolbar.querySelector("#sly-cancel-inline-btn").addEventListener("click", cancelInlineChanges);
+				toolbar.querySelector("#sly-exit-inline-btn").addEventListener("click", exitEditMode);
+			}
+
+			function cancelInlineChanges() {
+				draftChanges = {};
+				renderProduct();
+				renderEditToolbar();
+				Swal.fire({
+					toast: true,
+					position: 'top-end',
+					timer: 1500,
+					timerProgressBar: true,
+					showConfirmButton: false,
+					title: 'Đã hủy các thay đổi chưa lưu',
+					icon: 'info'
+				});
+			}
+
+			function exitEditMode() {
+				editModeActive = false;
+				draftChanges = {};
+				const cleanParams = new URLSearchParams(window.location.search);
+				cleanParams.delete("editmode");
+				cleanParams.delete("editMode");
+				const cleanUrl = window.location.pathname + (cleanParams.toString() ? '?' + cleanParams.toString() : '');
+				window.history.replaceState({}, '', cleanUrl);
+
+				document.getElementById("sly-inline-edit-toolbar")?.remove();
+				renderProduct();
+			}
+
+			async function saveInlineChanges() {
+				if (Object.keys(draftChanges).length === 0) return;
+				
+				const saveBtn = document.getElementById("sly-save-inline-btn");
+				if (saveBtn) {
+					saveBtn.disabled = true;
+					saveBtn.textContent = "Đang lưu...";
+				}
+
+				try {
+					const token = StaticStorefront.getAdminToken();
+					const response = await fetch(`${StaticStorefront.API_BASE}/api/admin/products/${product.id}/inline-content`, {
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`,
+							'X-Authorization': `Bearer ${token}`
+						},
+						body: JSON.stringify(draftChanges)
+					});
+
+					const resData = await response.json();
+					if (!response.ok) {
+						throw new Error(resData.error || 'Lỗi khi lưu thay đổi.');
+					}
+
+					let benefits = resData.data.policy_benefits || product.policy_benefits;
+					if (typeof benefits === 'string') {
+						try {
+							benefits = JSON.parse(benefits);
+						} catch (e) {
+							benefits = [];
+						}
+					}
+					if (!Array.isArray(benefits)) {
+						benefits = [];
+					}
+
+					product = {
+						...product,
+						title: resData.data.name || resData.data.title || product.title,
+						description: resData.data.description || product.description,
+						short_description: resData.data.short_description || product.short_description,
+						policy_benefits: benefits,
+						purchase_policy: resData.data.purchase_policy || product.purchase_policy,
+						return_policy: resData.data.return_policy || product.return_policy,
+						images: resData.data.images || product.images
+					};
+
+					if (resData.data.slug && resData.data.slug !== params.get("slug")) {
+						const cleanParams = new URLSearchParams(window.location.search);
+						cleanParams.set("slug", resData.data.slug);
+						const cleanUrl = window.location.pathname + '?' + cleanParams.toString();
+						window.history.replaceState({}, '', cleanUrl);
+					}
+
+					draftChanges = {};
+					renderProduct();
+					renderEditToolbar();
+
+					Swal.fire({
+						toast: true,
+						position: 'top-end',
+						timer: 1500,
+						timerProgressBar: true,
+						showConfirmButton: false,
+						title: 'Đã lưu thay đổi thành công!',
+						icon: 'success'
+					});
+				} catch (err) {
+					console.error(err);
+					if (saveBtn) {
+						saveBtn.disabled = false;
+						saveBtn.textContent = "Lưu thay đổi";
+					}
+					Swal.fire({
+						title: 'Lỗi lưu thay đổi',
+						text: err.message || 'Vui lòng kiểm tra lại quyền truy cập admin.',
+						icon: 'error',
+						confirmButtonText: 'Đóng'
+					});
+				}
+			}
+
+			function updateDirtyState() {
+				renderEditToolbar();
 			}
 
 			document.getElementById("mobile-menu-toggle").addEventListener("click", () => {
@@ -452,12 +1865,43 @@
 				document.body.classList.toggle("menu-open", isOpen);
 			});
 
-			if (product) {
+			async function loadProduct() {
+				StaticStorefront.mountAdminLoginButton(loadProduct);
+				const slug = params.get("slug");
+				const id = Number(params.get("id") || 0);
+				product = slug
+					? await StaticStorefront.loadProductBySlug(slug)
+					: id
+						? await StaticStorefront.loadProductById(id)
+						: (await StaticStorefront.loadProducts({ limit: "1" }))[0];
+
+				const editModeParam = params.get("editmode") || params.get("editMode");
+				if (editModeParam === "true" || editModeParam === "1") {
+					if (StaticStorefront.canEditProducts()) {
+						editModeActive = true;
+					} else {
+						const cleanParams = new URLSearchParams(window.location.search);
+						cleanParams.delete("editmode");
+						cleanParams.delete("editMode");
+						const cleanUrl = window.location.pathname + (cleanParams.toString() ? '?' + cleanParams.toString() : '');
+						window.history.replaceState({}, '', cleanUrl);
+					}
+				}
+
+				activeVariantIndex = 0;
 				setMeta(product);
 				injectProductSchema(product);
+				saveToRecentlyViewed(product);
+				renderProduct();
+				renderEditToolbar();
+				updateCartBadge();
 			}
-			renderProduct();
-			updateCartBadge();
+
+			loadProduct().catch(() => {
+				product = null;
+				renderProduct();
+				updateCartBadge();
+			});
 		</script>
 	</body>
 </html>

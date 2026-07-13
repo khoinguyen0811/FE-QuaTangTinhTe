@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <script>
+    window.location.href = '/login';
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Mắt Bão WS</title>
+  <meta name="description" content="Trang quản trị hệ thống Mắt Bão WS. Only Sell Online." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('admin_theme');
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = 'dark';
+      }
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    .leaflet-container {
+      background: #1a1a2e;
+    }
+
+    /* Skeleton Loading Placeholder */
+    .skeleton-loader,
+    .skeleton-shimmer {
+      position: relative;
+      overflow: hidden;
+      background-color: #f3f4f6;
+      border-radius: 8px;
+    }
+
+    .skeleton-loader::after,
+    .skeleton-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.4) 20%,
+          rgba(255, 255, 255, 0.7) 60%,
+          rgba(255, 255, 255, 0) 100%);
+      animation: shimmer-sweep 1.5s infinite;
+    }
+
+    @keyframes shimmer-sweep {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Admin design tokens */
+    :root[data-theme="dark"] {
+      --bg-main: #0b1020;
+      --bg-sidebar: #070b16;
+      --bg-sidebar-rail: #050816;
+      --bg-topbar: #0b1020;
+      --bg-card: #11172a;
+      --bg-card-soft: #151c33;
+      --bg-elevated: #161c32;
+      --bg-input: #0f1322;
+      --bg-dropdown: #11172a;
+      --bg-hover: rgba(255, 255, 255, 0.055);
+      --bg-table-hover: rgba(255, 255, 255, 0.035);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --text-inverse: #ffffff;
+      --primary: #5d58f0;
+      --primary-hover: #4b46d5;
+      --primary-soft: rgba(93, 88, 240, 0.16);
+      --danger-soft: rgba(244, 63, 94, 0.12);
+      --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.22);
+      --scrollbar-track: #0b1020;
+      --scrollbar-thumb: #1e2945;
+    }
+
+    :root[data-theme="light"] {
+      --bg-main: #f4f7fb;
+      --bg-sidebar: #ffffff;
+      --bg-sidebar-rail: #f8fafc;
+      --bg-topbar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-soft: #f1f5f9;
+      --bg-elevated: #ffffff;
+      --bg-input: #ffffff;
+      --bg-dropdown: #ffffff;
+      --bg-hover: rgba(15, 23, 42, 0.055);
+      --bg-table-hover: #eef2ff;
+      --border-color: rgba(15, 23, 42, 0.08);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-inverse: #ffffff;
+      --primary: #5d58f0;
+      --primary-hover: #4b46d5;
+      --primary-soft: rgba(93, 88, 240, 0.12);
+      --danger-soft: rgba(244, 63, 94, 0.1);
+      --shadow-card: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --scrollbar-track: #edf2f7;
+      --scrollbar-thumb: #cbd5e1;
+    }
+
+    body,
+    #admin-root,
+    #admin-content,
+    #admin-topbar header,
+    #admin-sidebar-aside,
+    #admin-root .bg-white,
+    #admin-root .bg-gray-50,
+    #admin-root .bg-gray-100,
+    #admin-root input,
+    #admin-root select,
+    #admin-root textarea,
+    #admin-root table,
+    #admin-root th,
+    #admin-root td {
+      transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    body {
+      background-color: var(--bg-main) !important;
+      color: var(--text-primary) !important;
+    }
+
+    .leaflet-container {
+      background: var(--bg-card-soft);
+    }
+
+    .skeleton-loader,
+    .skeleton-shimmer {
+      background-color: var(--bg-card-soft);
+    }
+
+    #admin-root,
+    #admin-content,
+    #main-content {
+      background-color: var(--bg-main) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #admin-topbar header {
+      background-color: var(--bg-topbar) !important;
+      border-bottom-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #admin-sidebar-aside {
+      background-color: var(--bg-sidebar) !important;
+      border-right-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+    }
+
+    #admin-sidebar-aside [class~="bg-[#080b16]"] {
+      background-color: var(--bg-sidebar-rail) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    #admin-sidebar-aside [class~="bg-[#0a0d18]/30"],
+    #admin-sidebar-aside [class~="bg-[#11162a]/40"] {
+      background-color: var(--bg-card-soft) !important;
+    }
+
+    #admin-root .bg-white,
+    #admin-root .bg-gray-50,
+    #admin-root .bg-gray-100,
+    #admin-root .bg-slate-50,
+    #admin-root .bg-slate-100,
+    #admin-root [class~="bg-[#161c32]"] {
+      background-color: var(--bg-card) !important;
+    }
+
+    #admin-root [class~="bg-[#0f1322]"],
+    #admin-root [class~="bg-[#0f1322]/20"],
+    #admin-root [class~="bg-[#0f1322]/40"],
+    #admin-root [class~="bg-[#0f1322]/50"],
+    #admin-root [class~="bg-[#11162a]"] {
+      background-color: var(--bg-card-soft) !important;
+    }
+
+    #admin-root .border-gray-100,
+    #admin-root .border-gray-150,
+    #admin-root .border-gray-200,
+    #admin-root .border-gray-250,
+    #admin-root .border-gray-300,
+    #admin-root .border-slate-200,
+    #admin-root .border-slate-300,
+    #admin-root [class~="border-[#1e2945]"],
+    #admin-root [class~="border-[#1e2945]/45"],
+    #admin-root [class~="border-[#1e2945]/70"] {
+      border-color: var(--border-color) !important;
+    }
+
+    #admin-root [class~="divide-[#1e2945]/70"] > :not([hidden]) ~ :not([hidden]),
+    #admin-root .divide-y > :not([hidden]) ~ :not([hidden]) {
+      border-color: var(--border-color) !important;
+    }
+
+    #admin-root .text-gray-900,
+    #admin-root .text-gray-800,
+    #admin-root .text-slate-900,
+    #admin-root .text-slate-800,
+    #admin-root .text-zinc-950,
+    #admin-root .text-black {
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root .text-gray-700,
+    #admin-root .text-gray-650,
+    #admin-root .text-gray-600,
+    #admin-root .text-slate-700,
+    #admin-root .text-slate-600,
+    #admin-root .text-gray-300 {
+      color: var(--text-secondary) !important;
+    }
+
+    #admin-root .text-gray-500,
+    #admin-root .text-gray-455,
+    #admin-root .text-gray-450,
+    #admin-root .text-gray-400,
+    #admin-root .text-gray-300,
+    #admin-root .text-slate-500,
+    #admin-root .text-slate-400 {
+      color: var(--text-muted) !important;
+    }
+
+    :root[data-theme="light"] #admin-content [class~="bg-[#161c32]"] .text-white,
+    :root[data-theme="light"] #admin-content [class~="bg-[#0f1322]"] .text-white,
+    :root[data-theme="light"] #admin-sidebar-aside .text-white {
+      color: var(--text-primary) !important;
+    }
+
+    :root[data-theme="light"] #admin-root [class~="bg-[#5d58f0]"].text-white,
+    :root[data-theme="light"] #admin-root [class~="bg-[#5d58f0]"] .text-white,
+    :root[data-theme="light"] #admin-root [class~="bg-[#C9A84C]"].text-white,
+    :root[data-theme="light"] #admin-root [class~="bg-[#C9A84C]"] .text-white,
+    :root[data-theme="light"] #admin-root button.text-white {
+      color: var(--text-inverse) !important;
+    }
+
+    #admin-root input:not([type="checkbox"]):not([type="radio"]),
+    #admin-root select,
+    #admin-root textarea {
+      background-color: var(--bg-input) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root input::placeholder,
+    #admin-root textarea::placeholder {
+      color: var(--text-muted) !important;
+    }
+
+    #admin-root input[type="checkbox"],
+    #admin-root input[type="radio"] {
+      accent-color: var(--primary);
+    }
+
+    #admin-root table {
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root thead,
+    #admin-root th,
+    #admin-root [class~="bg-gray-50"] {
+      background-color: var(--bg-card-soft) !important;
+    }
+
+    #admin-root th {
+      color: var(--text-secondary) !important;
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    #admin-root td {
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    #admin-root tbody tr:hover,
+    #admin-root tbody tr:hover td {
+      background-color: var(--bg-table-hover) !important;
+    }
+
+    #admin-root .dropdown-menu,
+    #admin-root #user-dropdown,
+    #admin-root [id$="-popover"] {
+      background-color: var(--bg-dropdown) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+      box-shadow: var(--shadow-card) !important;
+    }
+
+    #admin-root [class~="bg-blue-50"],
+    #admin-root [class~="bg-blue-100/50"],
+    #admin-root [class~="bg-indigo-50"] {
+      background-color: var(--primary-soft) !important;
+      color: var(--primary) !important;
+    }
+
+    #admin-root .bg-red-50,
+    #admin-root .bg-rose-50,
+    body > .fixed .bg-red-50,
+    body > .fixed .bg-rose-50 {
+      background-color: var(--danger-soft) !important;
+    }
+
+    #admin-root [class~="bg-[#5d58f0]"],
+    #admin-root [class~="bg-[#C9A84C]"],
+    #admin-root [class~="bg-[#c9a84c]"] {
+      background-color: var(--primary) !important;
+    }
+
+    #admin-root [class~="bg-[#5d58f0]/10"],
+    #admin-root [class~="bg-[#C9A84C]/10"],
+    #admin-root [class~="bg-[#C9A84C]/20"],
+    #admin-root [class~="bg-[#c9a84c]/10"],
+    #admin-root [class~="bg-[#c9a84c]/20"] {
+      background-color: var(--primary-soft) !important;
+    }
+
+    #admin-root [class~="text-[#5d58f0]"],
+    #admin-root [class~="text-[#8762f9]"],
+    #admin-root [class~="text-[#C9A84C]"],
+    #admin-root [class~="text-[#c9a84c]"],
+    #admin-root [class~="text-[#b8963e]"] {
+      color: var(--primary) !important;
+    }
+
+    #admin-root [class~="border-[#5d58f0]"],
+    #admin-root [class~="border-[#C9A84C]"],
+    #admin-root [class~="border-[#c9a84c]"],
+    #admin-root [class~="focus:border-[#C9A84C]"]:focus,
+    #admin-root [class~="focus:border-[#c9a84c]"]:focus {
+      border-color: var(--primary) !important;
+    }
+
+    #admin-root [class~="accent-[#C9A84C]"],
+    #admin-root [class~="accent-[#c9a84c]"],
+    #admin-root [class~="text-[#C9A84C]"] {
+      accent-color: var(--primary) !important;
+    }
+
+    #admin-root [class~="focus:ring-[#C9A84C]"]:focus,
+    #admin-root [class~="focus:ring-[#c9a84c]"]:focus {
+      --tw-ring-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 3px var(--primary-soft) !important;
+    }
+
+    #admin-root [class~="hover:bg-[#4b46d5]"]:hover,
+    #admin-root [class~="hover:bg-[#b8963e]"]:hover,
+    #admin-root [class~="hover:bg-[#b5953c]"]:hover {
+      background-color: var(--primary-hover) !important;
+    }
+
+    #admin-root [class~="hover:bg-gray-50"]:hover,
+    #admin-root [class~="hover:bg-gray-100"]:hover,
+    #admin-root [class~="hover:bg-slate-50"]:hover,
+    #admin-root [class~="hover:bg-white/5"]:hover,
+    #admin-root [class~="hover:bg-[#0f1322]"]:hover {
+      background-color: var(--bg-hover) !important;
+    }
+
+    #admin-root [class~="hover:bg-red-50"]:hover,
+    body > .fixed [class~="hover:bg-red-50"]:hover {
+      background-color: var(--danger-soft) !important;
+    }
+
+    #admin-root [class~="hover:text-white"]:hover,
+    #admin-root [class~="hover:text-gray-900"]:hover,
+    #admin-root [class~="hover:text-gray-800"]:hover,
+    #admin-root [class~="hover:text-gray-700"]:hover,
+    #admin-root [class~="hover:text-black"]:hover {
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root .admin-theme-toggle {
+      background-color: var(--bg-card-soft);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    #admin-root .admin-theme-toggle:hover {
+      background-color: var(--bg-hover);
+      color: var(--primary);
+    }
+
+    #admin-root .admin-card {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+      box-shadow: var(--shadow-card);
+    }
+
+    #admin-root .admin-input {
+      background-color: var(--bg-input) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root .admin-primary-btn {
+      background-color: var(--primary) !important;
+      color: var(--text-inverse) !important;
+    }
+
+    #admin-root .admin-primary-btn:hover {
+      background-color: var(--primary-hover) !important;
+    }
+
+    #admin-root .admin-dropdown {
+      background-color: var(--bg-dropdown) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #admin-root .admin-status-toggle.is-active {
+      background-color: var(--primary) !important;
+    }
+
+    #admin-root .admin-status-toggle.is-inactive {
+      background-color: var(--bg-card-soft) !important;
+      border: 1px solid var(--border-color);
+    }
+
+    #admin-root .admin-page-btn {
+      background-color: var(--bg-card);
+      border-color: var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    #admin-root .admin-page-btn:hover:not(:disabled) {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    #admin-root .admin-page-btn.is-active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: var(--text-inverse);
+    }
+
+    #admin-root .admin-page-btn.is-disabled {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    #admin-root .admin-modal-panel,
+    body > .fixed .admin-modal-panel {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+      box-shadow: var(--shadow-card) !important;
+    }
+
+    #admin-root .admin-icon-btn,
+    body > .fixed .admin-icon-btn {
+      color: var(--text-muted) !important;
+    }
+
+    #admin-root .admin-icon-btn:hover,
+    body > .fixed .admin-icon-btn:hover {
+      background-color: var(--bg-hover) !important;
+      color: var(--text-primary) !important;
+    }
+
+    body > .fixed [class~="bg-white"],
+    body > .fixed .bg-white {
+      background-color: var(--bg-card) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    body > .fixed .text-gray-900,
+    body > .fixed .text-gray-800,
+    body > .fixed .text-slate-900,
+    body > .fixed .text-zinc-950,
+    body > .fixed .text-black {
+      color: var(--text-primary) !important;
+    }
+
+    body > .fixed .text-gray-700,
+    body > .fixed .text-gray-600,
+    body > .fixed .text-slate-700,
+    body > .fixed .text-slate-600,
+    body > .fixed .text-gray-300 {
+      color: var(--text-secondary) !important;
+    }
+
+    body > .fixed .text-gray-500,
+    body > .fixed .text-gray-400,
+    body > .fixed .text-slate-500,
+    body > .fixed .text-slate-400 {
+      color: var(--text-muted) !important;
+    }
+
+    body > .fixed .border-gray-100,
+    body > .fixed .border-gray-200,
+    body > .fixed .border-gray-300,
+    body > .fixed .border-slate-200 {
+      border-color: var(--border-color) !important;
+    }
+
+    body > .fixed input:not([type="checkbox"]):not([type="radio"]),
+    body > .fixed select,
+    body > .fixed textarea {
+      background-color: var(--bg-input) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    body > .fixed [class~="hover:bg-gray-50"]:hover,
+    body > .fixed [class~="hover:bg-gray-100"]:hover {
+      background-color: var(--bg-hover) !important;
+    }
+
+    .swal2-popup {
+      background: var(--bg-card) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+
+    .swal2-title,
+    .swal2-html-container {
+      color: var(--text-primary) !important;
+    }
+
+    /* Sidebar Collapsed Styles */
+    #admin-sidebar-aside.collapsed {
+      width: 70px !important;
+    }
+    #admin-sidebar-aside.collapsed .flex-1 {
+      display: none !important;
+    }
+    #admin-sidebar-spacer.collapsed {
+      width: 70px !important;
+    }
+
+    /* Custom scrollbars matching premium styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track) !important;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb) !important;
+      border-radius: 4px !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary) !important;
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body class="bg-gray-100">
+  <div id="admin-root">
+    <h1 class="sr-only">Hệ thống quản trị Mắt Bão WS</h1>
+    <div class="flex h-screen items-center justify-center text-gray-500">Đang tải trang quản trị...</div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      const pathname = window.location.pathname;
+      const cleanPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+      const adminIdx = cleanPath.lastIndexOf('/admin');
+      const prefix = adminIdx !== -1 ? cleanPath.substring(0, adminIdx) : '';
+      const swPath = prefix + '/sw.js';
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+
+      navigator.serviceWorker.register(swPath)
+        .catch((error) => {
+          console.warn('Service Worker registration skipped/failed in Admin:', error);
+        });
+    }
+  </script>
+  <script type="module">
+    const pathname = window.location.pathname;
+    const cleanPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+    const adminIdx = cleanPath.lastIndexOf('/admin');
+    const prefix = adminIdx !== -1 ? cleanPath.substring(0, adminIdx) : '';
+    import(prefix + '/frontend/src/pages/Admin/index.js?v=' + Date.now()).catch(console.error);
+  </script>
+</body>
+
+</html>

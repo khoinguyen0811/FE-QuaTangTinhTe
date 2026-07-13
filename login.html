@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="vi">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Đăng nhập - Quà Tặng Tinh Tế</title>
+		<meta name="description" content="Đăng nhập tài khoản Quà Tặng Tinh Tế để theo dõi đơn hàng và lưu thông tin quà tặng pha lê." />
+		<meta name="robots" content="noindex, follow" />
+		<link rel="icon" href="public/logo.png" type="image/png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+		<link rel="stylesheet" href="index.css" />
+	</head>
+	<body>
+		<a class="skip-link" href="#main-content">Bỏ qua để đến nội dung chính</a>
+
+		<div class="announcement" role="status">
+			Miễn phí dựng mẫu 3D trước khi khắc - tư vấn nhanh qua hotline 0983 833 830
+		</div>
+
+		<header class="site-header">
+			<div class="container nav-shell">
+				<a class="brand-link" href="/" aria-label="Trang chủ Quà Tặng Tinh Tế">
+					<img class="brand-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
+				</a>
+				<nav class="desktop-nav" aria-label="Menu chính">
+					<a href="/">Trang chủ</a>
+					<a href="about.html">Giới thiệu</a>
+					<a href="collection.html">Bộ sưu tập</a>
+					<a href="contact.html">Liên hệ</a>
+				</nav>
+				<div class="header-actions">
+					<label class="search-field" for="search-input">
+						<span class="sr-only">Tìm sản phẩm pha lê</span>
+						<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+						<input
+							id="search-input"
+							type="search"
+							placeholder="Tìm mẫu pha lê..."
+							autocomplete="off"
+						/>
+					</label>
+					<a class="icon-button" href="cart.html" aria-label="Xem giỏ hàng">
+						<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+						<span id="cart-badge" class="cart-badge">0</span>
+					</a>
+					<a class="icon-button" href="login.html" aria-current="page" aria-label="Đăng nhập tài khoản">
+						<i class="fa-solid fa-user" aria-hidden="true"></i>
+					</a>
+					<button class="icon-button menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Mở menu">
+						<i class="fa-solid fa-bars" aria-hidden="true"></i>
+					</button>
+				</div>
+			</div>
+			<nav id="mobile-nav" class="mobile-nav container" aria-label="Menu di động">
+				<a href="/">Trang chủ</a>
+				<a href="about.html">Giới thiệu</a>
+				<a href="collection.html">Bộ sưu tập</a>
+				<a href="contact.html">Liên hệ</a>
+				<a href="login.html" aria-current="page">Đăng nhập</a>
+			</nav>
+		</header>
+
+		<main id="main-content" class="section section-tint auth-page">
+			<div class="container auth-shell">
+				<section class="auth-copy" aria-labelledby="login-copy-title">
+					<p class="eyebrow">Tài khoản khách hàng</p>
+					<h1 id="login-copy-title">Đăng nhập để tiếp tục <span>lưu giữ món quà.</span></h1>
+					<p>
+						Theo dõi giỏ hàng, nhận ưu đãi chào mừng và giữ lại thông tin liên hệ để đội ngũ tư vấn xác nhận mẫu pha lê nhanh hơn.
+					</p>
+				</section>
+
+				<section class="auth-card" aria-labelledby="login-title">
+					<p class="eyebrow">Quà Tặng Tinh Tế</p>
+					<h2 id="login-title">Đăng nhập</h2>
+					<form id="login-form" class="form-grid" novalidate>
+						<div class="field">
+							<label for="login-email">Email</label>
+							<input id="login-email" name="email" type="email" autocomplete="email" required placeholder="ban@example.com" />
+						</div>
+						<div class="field">
+							<label for="login-password">Mật khẩu</label>
+							<input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Tối thiểu 8 ký tự" />
+							<p class="password-rules">Mật khẩu phải có ít nhất 8 ký tự, gồm chữ và số.</p>
+						</div>
+						<button class="button button-primary" type="submit">
+							<i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+							Đăng nhập
+						</button>
+					</form>
+					<div id="auth-message" class="auth-message" role="status" aria-live="polite"></div>
+					<div id="auth-user-card" class="auth-user-card">
+						<p>Bạn đang đăng nhập với tài khoản <b id="auth-user-name"></b>.</p>
+						<button id="logout-button" class="button button-secondary" type="button">Đăng xuất</button>
+					</div>
+					<p class="auth-alt">Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></p>
+				</section>
+			</div>
+		</main>
+
+		<script src="static-client.js"></script>
+		<script>
+			(function () {
+				const AUTH_TOKEN_KEY = "dhat_auth_token";
+				const AUTH_USER_KEY = "dhat_auth_user";
+				const ADMIN_TOKEN_KEY = "sly_admin_auth_token";
+				const params = new URLSearchParams(window.location.search);
+				const next = params.get("next") || "/";
+
+				function resolveProjectPrefix() {
+					const { hostname, pathname } = window.location;
+					if (hostname.endsWith(".test")) return "";
+					if (pathname.startsWith("/sly%202/") || pathname.startsWith("/sly 2/")) return "/sly%202";
+					return "";
+				}
+
+				const API_BASE = `${window.location.origin}${resolveProjectPrefix()}/backend/public`;
+
+				function decodeJwtPayload(token) {
+					try {
+						const payload = token && token.split(".")[1];
+						if (!payload) return null;
+						const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+						const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), "=");
+						return JSON.parse(atob(padded));
+					} catch {
+						return null;
+					}
+				}
+
+				function isAdminToken(token) {
+					const payload = decodeJwtPayload(token);
+					const roles = [...(payload?.roles || []), ...(payload?.role_display_names || [])]
+						.map((role) => String(role || "").toLowerCase());
+					const permissions = payload?.permissions || [];
+					return roles.some((role) => role.includes("admin") || role === "system" || role === "editor") || permissions.some((permission) => String(permission).includes(":write"));
+				}
+
+				function validPassword(value) {
+					return value.length >= 8 && /[A-Za-zÀ-ỹ]/.test(value) && /\d/.test(value);
+				}
+
+				function setMessage(text, type = "") {
+					const box = document.getElementById("auth-message");
+					box.textContent = text;
+					box.className = `auth-message${type ? ` is-${type}` : ""}`;
+					box.style.display = text ? "block" : "none";
+				}
+
+				async function api(path, payload) {
+					const response = await fetch(`${API_BASE}${path}`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json", Accept: "application/json" },
+						body: JSON.stringify(payload),
+					});
+					const json = await response.json().catch(() => ({}));
+					if (!response.ok || json.success === false) {
+						throw new Error(json.error || "Không xử lý được yêu cầu.");
+					}
+					return json.data || json;
+				}
+
+				function persistSession(data) {
+					const token = data.token || data.access_token;
+					if (!token) throw new Error("Backend không trả token đăng nhập.");
+					localStorage.setItem(AUTH_TOKEN_KEY, token);
+					localStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user || {}));
+					const secure = window.location.protocol === "https:" ? "; Secure" : "";
+					document.cookie = `${AUTH_TOKEN_KEY}=${token}; path=/; max-age=604800; SameSite=Lax${secure}`;
+					if (isAdminToken(token)) {
+						localStorage.setItem(ADMIN_TOKEN_KEY, token);
+						document.cookie = `${ADMIN_TOKEN_KEY}=${token}; path=/; max-age=604800; SameSite=Lax${secure}`;
+					} else {
+						localStorage.removeItem(ADMIN_TOKEN_KEY);
+						document.cookie = `${ADMIN_TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+					}
+				}
+
+				function updateLoggedInState() {
+					const user = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || "null");
+					const token = localStorage.getItem(AUTH_TOKEN_KEY);
+					const card = document.getElementById("auth-user-card");
+					if (!token || !user) return;
+					document.getElementById("auth-user-name").textContent = user.full_name || user.email || "khách hàng";
+					card.style.display = "block";
+				}
+
+				document.getElementById("login-form").addEventListener("submit", async (event) => {
+					event.preventDefault();
+					const form = event.currentTarget;
+					const email = form.email.value.trim();
+					const password = form.password.value;
+					const submit = form.querySelector("button[type='submit']");
+					if (!email) return setMessage("Vui lòng nhập email.", "error");
+					if (!validPassword(password)) return setMessage("Mật khẩu phải có ít nhất 8 ký tự, gồm chữ và số.", "error");
+					submit.disabled = true;
+					submit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Đang đăng nhập';
+					try {
+						const data = await api("/api/auth/login", { email, password });
+						persistSession(data);
+						setMessage("Đăng nhập thành công. Đang chuyển trang...", "success");
+						window.setTimeout(() => { window.location.href = next; }, 500);
+					} catch (error) {
+						setMessage(error.message, "error");
+					} finally {
+						submit.disabled = false;
+						submit.innerHTML = '<i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Đăng nhập';
+					}
+				});
+
+				document.getElementById("logout-button").addEventListener("click", () => {
+					localStorage.removeItem(AUTH_TOKEN_KEY);
+					localStorage.removeItem(AUTH_USER_KEY);
+					localStorage.removeItem(ADMIN_TOKEN_KEY);
+					document.cookie = `${AUTH_TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+					document.cookie = `${ADMIN_TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+					window.location.reload();
+				});
+
+				document.getElementById("mobile-menu-toggle").addEventListener("click", () => {
+					const nav = document.getElementById("mobile-nav");
+					const button = document.getElementById("mobile-menu-toggle");
+					const isOpen = nav.classList.toggle("is-open");
+					button.setAttribute("aria-expanded", String(isOpen));
+					document.body.classList.toggle("menu-open", isOpen);
+				});
+
+				document.getElementById("cart-badge").textContent = JSON.parse(localStorage.getItem("cart") || "[]")
+					.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+				updateLoggedInState();
+			})();
+		</script>
+	</body>
+</html>

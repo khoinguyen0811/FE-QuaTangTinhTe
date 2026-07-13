@@ -9,7 +9,12 @@ const files = [
   "collection.html",
   "product.html",
   "cart.html",
+  "login.html",
+  "register.html",
+  "about.html",
+  "contact.html",
   "index.css",
+  "static-client.js",
 ];
 
 const directories = ["data", "public"];

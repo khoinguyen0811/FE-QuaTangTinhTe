@@ -35,20 +35,33 @@
 
 		<header class="site-header">
 			<div class="container nav-shell">
-				<a class="brand-link" href="index.html" aria-label="Trang chủ Quà Tặng Tinh Tế">
+				<a class="brand-link" href="/" aria-label="Trang chủ Quà Tặng Tinh Tế">
 					<img class="brand-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
 				</a>
 				<nav class="desktop-nav" aria-label="Menu chính">
-					<a href="index.html">Trang chủ</a>
+					<a href="/">Trang chủ</a>
+					<a href="about.html">Giới thiệu</a>
 					<a href="collection.html">Bộ sưu tập</a>
-					<a href="index.html#process">Quy trình</a>
-					<a href="index.html#quality">Cam kết</a>
-					<a href="#footer">Liên hệ</a>
+					<a href="contact.html">Liên hệ</a>
 				</nav>
 				<div class="header-actions">
+					<label class="search-field" for="search-input">
+						<span class="sr-only">Tìm sản phẩm pha lê</span>
+						<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+						<input
+							id="search-input"
+							type="search"
+							placeholder="Tìm mẫu pha lê..."
+							autocomplete="off"
+						/>
+					</label>
 					<a class="icon-button" href="cart.html" aria-label="Xem giỏ hàng" aria-current="page">
 						<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
 						<span id="cart-badge" class="cart-badge">0</span>
+					</a>
+					<a class="icon-button" href="login.html" data-auth-link aria-label="Đăng nhập tài khoản">
+						<i class="fa-solid fa-user" aria-hidden="true"></i>
+						<span class="sr-only" data-auth-label>Đăng nhập</span>
 					</a>
 					<button
 						class="icon-button menu-toggle"
@@ -63,11 +76,11 @@
 				</div>
 			</div>
 			<nav id="mobile-nav" class="mobile-nav container" aria-label="Menu di động">
-				<a href="index.html">Trang chủ</a>
+				<a href="/">Trang chủ</a>
+				<a href="about.html">Giới thiệu</a>
 				<a href="collection.html">Bộ sưu tập</a>
-				<a href="index.html#process">Quy trình</a>
-				<a href="index.html#quality">Cam kết</a>
-				<a href="#footer">Liên hệ</a>
+				<a href="contact.html">Liên hệ</a>
+				<a href="login.html" data-auth-link><span data-auth-label>Đăng nhập</span></a>
 			</nav>
 		</header>
 
@@ -82,7 +95,7 @@
 
 				<div class="cart-heading">
 					<p class="eyebrow">Giỏ hàng và thanh toán</p>
-					<h1>Hoàn tất món quà pha lê của bạn.</h1>
+					<h1>Hoàn tất món quà pha lê của&nbsp;bạn.</h1>
 					<p>
 						Kiểm tra lại sản phẩm, chọn dịch vụ quà tặng nếu cần và gửi thông tin giao nhận để đội ngũ tư vấn xác nhận mẫu khắc.
 					</p>
@@ -244,44 +257,84 @@
 
 		<footer id="footer" class="site-footer">
 			<div class="container footer-grid">
-				<section aria-labelledby="footer-brand">
-					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" />
-					<h2 id="footer-brand">Quà Tặng Tinh Tế</h2>
-					<p>Chế tác pha lê khắc chân dung 3D bằng laser, tư vấn mẫu và cá nhân hóa quà tặng theo từng dịp.</p>
+				<section class="footer-info-col">
+					<img class="footer-logo" src="public/logo.png" alt="Quà Tặng Tinh Tế" style="height: 42px; width: auto; object-fit: contain; margin-bottom: 1.25rem; filter: brightness(0) invert(1);" />
+					<div style="font-size: 0.88rem; line-height: 1.6; display: grid; gap: 0.6rem; color: rgba(255,255,255,0.72);">
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-location-dot" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Địa chỉ: CÔNG TY TNHH SX-TM-DV PHA LÊ VIỆT</strong><br>
+								<span style="font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+									- GPKD số 0304609065 cấp ngày 15/07/2022 tại Sở kế hoạch và Đầu tư TP.HCM<br>
+									- Showroom: 340/39 Quang Trung, P. Gò Vấp, TP. HCM.<br>
+									- Xưởng SX: 72 Vườn Lài, P. An Phú Đông, TP. HCM
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+							<i class="fa-solid fa-clock" style="margin-top: 0.3rem; flex-shrink: 0; color: #fff;"></i>
+							<div>
+								<strong style="color: #fff;">Thời gian làm việc:</strong><br>
+								<span style="font-size: 0.85rem;">
+									Thứ 2 đến Thứ 7 (8h - 17h30)<br>
+									- Hotline: <a href="tel:0983833830" style="color: #3b92ab; font-weight: 700;">0983.83.38.30</a><br>
+									- NVKD 1: <a href="tel:0978848938" style="color: #3b92ab; font-weight: 700;">0978.848.938</a><br>
+									- NVKD 2: <a href="tel:0966782938" style="color: #3b92ab; font-weight: 700;">0966.782.938</a>
+								</span>
+							</div>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-phone" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Số điện thoại: <a href="tel:0983833830" style="color: rgba(255,255,255,0.72);"><strong style="color: #fff;">0983833830</strong></a></span>
+						</div>
+						<div style="display: flex; gap: 0.5rem; align-items: center;">
+							<i class="fa-solid fa-envelope" style="color: #fff; flex-shrink: 0;"></i>
+							<span>Email: <a href="mailto:quatangtinhte@phaleviet.vn" style="color: rgba(255,255,255,0.72);">quatangtinhte@phaleviet.vn</a></span>
+						</div>
+					</div>
 				</section>
-				<section aria-labelledby="footer-products">
-					<h3 id="footer-products">Dòng sản phẩm</h3>
-					<ul>
-						<li><a href="collection.html">Pha lê chữ nhật</a></li>
-						<li><a href="collection.html">Pha lê trái tim</a></li>
-						<li><a href="collection.html">Pha lê đa giác</a></li>
-						<li><a href="collection.html">Pha lê giọt nước</a></li>
+				<section aria-labelledby="footer-policies">
+					<h3 id="footer-policies" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Chính sách</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none;">
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách mua hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách giao hàng</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách thanh toán</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách đổi trả</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách hoàn tiền</a></li>
+						<li><a href="#" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Chính sách bảo mật</a></li>
 					</ul>
 				</section>
-				<section aria-labelledby="footer-service">
-					<h3 id="footer-service">Dịch vụ</h3>
-					<ul>
-						<li><a href="index.html#process">Dựng mẫu 3D miễn phí</a></li>
-						<li><a href="index.html#quality">Ảnh sản phẩm hiển thị đầy đủ</a></li>
-						<li><a href="cart.html">Đặt hàng qua giỏ hàng</a></li>
-						<li><a href="index.html">Về trang chủ</a></li>
+				<section aria-labelledby="footer-links">
+					<h3 id="footer-links" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Liên kết trang</h3>
+					<ul style="display: grid; gap: 0.65rem; padding: 0; margin: 0; list-style: none; margin-bottom: 1.5rem;">
+						<li><a href="/" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Trang chủ</a></li>
+						<li><a href="collection.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Sản phẩm</a></li>
+						<li><a href="about.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Giới thiệu</a></li>
+						<li><a href="contact.html" style="color: rgba(255,255,255,0.72); font-size: 0.88rem;">Liên hệ</a></li>
 					</ul>
+					<div class="payment-methods" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Visa"><i class="fa-brands fa-cc-visa" style="color: #1a1f71; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="Mastercard"><i class="fa-brands fa-cc-mastercard" style="color: #ea001b; font-size: 20px;"></i></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="MoMo"><span style="color: #a50064; font-weight: 800; font-family: sans-serif; font-size: 10px;">momo</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="ZaloPay"><span style="color: #008cfe; font-weight: 800; font-family: sans-serif; font-size: 10px;">ZaloPay</span></span>
+						<span style="background: #fff; padding: 4px 8px; border-radius: 4px; display: inline-flex; height: 26px; align-items: center;" title="COD"><i class="fa-solid fa-truck" style="color: #475569; font-size: 14px;"></i></span>
+					</div>
 				</section>
-				<section aria-labelledby="footer-contact">
-					<h3 id="footer-contact">Liên hệ</h3>
-					<ul>
-						<li>Hotline: <a href="tel:0983833830">0983 833 830</a></li>
-						<li>Email: <a href="mailto:info@quatangtinhte.vn">info@quatangtinhte.vn</a></li>
-						<li>TP. Hồ Chí Minh, Việt Nam</li>
-					</ul>
+				<section aria-labelledby="footer-newsletter">
+					<h3 id="footer-newsletter" style="margin: 0 0 1.25rem; color: #fff; font-size: 0.95rem; text-transform: uppercase; font-weight: 700;">Đăng ký nhận tin</h3>
+					<p style="font-size: 0.88rem; margin: 0 0 1rem; opacity: 0.85; color: rgba(255,255,255,0.72);">Bạn có muốn nhận khuyến mãi đặc biệt? Đăng ký ngay.</p>
+					<form onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã đăng ký!'); this.reset();" style="display: flex; border-radius: 99px; background: #fff; overflow: hidden; padding: 2px; border: 1px solid rgba(255,255,255,0.15); max-width: 320px;">
+						<input type="email" required placeholder="Nhập địa chỉ email" style="flex: 1; border: 0; padding: 0.5rem 0.85rem; font-size: 0.85rem; outline: none; background: transparent; color: #1e293b;" />
+						<button type="submit" style="background: #143944; color: #fff; border: 0; border-radius: 99px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0;" onmouseover="this.style.background='#245f70'" onmouseout="this.style.background='#143944'">Đăng ký</button>
+					</form>
 				</section>
 			</div>
-			<div class="container footer-bottom">
-				<span>© 2026 Quà Tặng Tinh Tế. Bảo lưu mọi quyền.</span>
-				<span>Pha lê K9 - Khắc laser 3D - Cá nhân hóa theo yêu cầu</span>
+			<div class="container footer-bottom" style="font-size: 0.82rem; color: rgba(255,255,255,0.55); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 1.2rem 0;">
+				<span>© Bản quyền thuộc về Quà Tặng Tinh Tế</span>
 			</div>
 		</footer>
 
+		<script src="static-client.js"></script>
 		<script>
 			let compiledOrderString = "";
 
@@ -336,6 +389,12 @@
 				return variantInfo.option ? `${variantInfo.size} - ${variantInfo.option}` : variantInfo.size;
 			}
 
+			function productHref(item) {
+				return item.slug
+					? `product.html?slug=${encodeURIComponent(item.slug)}`
+					: `product.html?id=${encodeURIComponent(item.productId)}`;
+			}
+
 			function renderCart() {
 				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 				const wrapper = document.getElementById("cart-items-wrapper");
@@ -377,17 +436,44 @@
 							? `<span><strong>Ảnh khắc:</strong> ${item.customImageName || "Đã gửi kèm"}</span>`
 							: `<span><strong>Ảnh khắc:</strong> Không gửi kèm</span>`;
 
+						const itemUrl = productHref(item);
 						return `
 							<article class="cart-item">
-								<a class="cart-item-media" href="product.html?id=${item.productId}" aria-label="Xem ${item.title}">
+								<a class="cart-item-media" href="${itemUrl}" aria-label="Xem ${item.title}">
 									<img src="${item.imageUrl}" alt="${item.title}" referrerpolicy="no-referrer" />
 								</a>
 								<div class="cart-item-info">
-									<h3><a href="product.html?id=${item.productId}">${item.title}</a></h3>
+									<h3><a href="${itemUrl}">${item.title}</a></h3>
 									<p>SKU: <strong>${item.sku}</strong> | Phân loại: <strong>${variantLabel}</strong></p>
 									<div class="cart-item-tags">
 										${customText}
 										${customImageHtml}
+									</div>
+									<div class="cart-customization-form" style="margin-top: 10px; padding: 10px; border: 1px dashed var(--line); border-radius: 8px; background: #f8fafc;">
+										<div style="font-size: 0.75rem; font-weight: 700; color: var(--brand-700); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+											<i class="fa-solid fa-wand-magic-sparkles"></i> Thiết kế cá nhân hóa sản phẩm
+										</div>
+										<div style="display: flex; flex-direction: column; gap: 8px;">
+											<div>
+												<label style="font-size: 0.75rem; font-weight: 600; display: block; margin-bottom: 3px;">Nội dung chữ cần khắc:</label>
+												<input type="text" placeholder="Nhập chữ cần khắc..." value="${item.customText || ''}" onchange="window.updateCartCustomText(${index}, this.value)" style="width: 100%; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff;" />
+											</div>
+											<div>
+												<label style="font-size: 0.75rem; font-weight: 600; display: block; margin-bottom: 3px;">Tải ảnh chân dung dựng 3D:</label>
+												<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+													<input type="file" accept="image/*" onchange="window.uploadCartCustomImage(${index}, this)" style="display: none;" id="cart-file-${index}" />
+													<button type="button" onclick="document.getElementById('cart-file-${index}').click()" style="padding: 4px 10px; background: #cbd5e1; color: #1e293b; border: 0; border-radius: 6px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600;">
+														<i class="fa-solid fa-upload"></i> ${customImage ? "Đổi ảnh" : "Chọn ảnh"}
+													</button>
+													<span id="cart-file-name-${index}" style="font-size: 0.72rem; color: var(--muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+														${item.customImageName || (customImage ? "Đã gửi kèm" : "Chưa chọn ảnh")}
+													</span>
+													${item.customImageData ? `
+														<img src="${item.customImageData}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1;" />
+													` : ""}
+												</div>
+											</div>
+										</div>
 									</div>
 								</div>
 								<div class="cart-item-actions">
@@ -442,6 +528,31 @@
 				cart.splice(index, 1);
 				localStorage.setItem("cart", JSON.stringify(cart));
 				renderCart();
+			};
+
+			window.updateCartCustomText = function (index, value) {
+				const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+				if (!cart[index]) return;
+				cart[index].customText = value.trim();
+				localStorage.setItem("cart", JSON.stringify(cart));
+				renderCart();
+			};
+
+			window.uploadCartCustomImage = function (index, fileInput) {
+				const file = fileInput.files[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+					if (!cart[index]) return;
+					cart[index].customImage = file.name;
+					cart[index].customImageName = file.name;
+					cart[index].customImageData = e.target.result; // Base64 data URL
+					localStorage.setItem("cart", JSON.stringify(cart));
+					renderCart();
+				};
+				reader.readAsDataURL(file);
 			};
 
 			window.handleCheckout = function (event) {
@@ -535,7 +646,10 @@
 				document.body.classList.toggle("menu-open", isOpen);
 			});
 
-			window.addEventListener("DOMContentLoaded", renderCart);
+			window.addEventListener("DOMContentLoaded", () => {
+				StaticStorefront.mountAdminLoginButton(renderCart);
+				renderCart();
+			});
 		</script>
 	</body>
 </html>
