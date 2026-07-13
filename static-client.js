@@ -231,6 +231,27 @@
       : `product.html?id=${encodeURIComponent(product.id)}`;
   }
 
+  function slugifySegment(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function collectionUrl(category) {
+    const name = category?.name || category?.title || String(category || "");
+    const slug = category?.slug || category?.category_slug || slugifySegment(name);
+    const prefix = resolveProjectPrefix();
+
+    return slug
+      ? `${prefix}/collections/${encodeURIComponent(slug)}/`
+      : `${prefix}/collection.html`;
+  }
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -2697,7 +2718,7 @@
       const dropdownMenu = document.createElement('div');
       dropdownMenu.className = 'dropdown-menu';
       dropdownMenu.innerHTML = categories.map(cat => `
-        <a href="collection.html?category=${encodeURIComponent(cat.name)}">${escapeHtml(cat.name)}</a>
+        <a href="${collectionUrl(cat)}">${escapeHtml(cat.name || cat.title || "Danh mục")}</a>
       `).join('');
       wrapper.appendChild(dropdownMenu);
     } catch (e) {
@@ -2923,6 +2944,7 @@
     loadProductBySlug,
     mountAdminLoginButton,
     openQuickProductEditor,
+    collectionUrl,
     productUrl,
     getAdminToken,
     fetchJson,

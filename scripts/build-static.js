@@ -51,15 +51,18 @@ fs.mkdirSync(outDir, { recursive: true });
 files.forEach(copyFile);
 directories.forEach(copyDirectory);
 const products = loadProductsData();
+const collectionGroups = categoryGroups(products);
 writeProductPages(products);
+writeCollectionPages(collectionGroups);
 writePleskHtaccess();
 writeRobotsTxt();
-writeSitemapXml(products);
+writeSitemapXml(products, collectionGroups);
 
 console.log(`Static site copied to ${path.relative(root, outDir)}`);
 console.log(`Plesk assets generated for ${siteUrl}`);
 console.log(apiBase ? `API base locked to ${apiBase}` : "API base uses runtime default /backend/public");
 console.log(`Pre-rendered ${products.filter(productSlug).length} product pages`);
+console.log(`Pre-rendered ${collectionGroups.length} category pages`);
 
 function normalizeSiteUrl(value) {
   const raw = String(value || "").trim().replace(/\/+$/, "");
@@ -138,6 +141,45 @@ function productSlug(product) {
     return source.split("/products/")[1].split(/[?#/]/)[0];
   }
   return "";
+}
+
+function slugifySegment(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function productCategory(product) {
+  return product.category || product.category_name || "Sản phẩm";
+}
+
+function categoryGroups(products = []) {
+  const groups = new Map();
+
+  products.forEach((product) => {
+    const name = productCategory(product);
+    const slug = slugifySegment(product.categorySlug || product.category_slug || name);
+    if (!slug) return;
+
+    if (!groups.has(slug)) {
+      groups.set(slug, {
+        slug,
+        name,
+        products: [],
+      });
+    }
+
+    groups.get(slug).products.push(product);
+  });
+
+  return [...groups.values()]
+    .filter((group) => group.products.some(productSlug))
+    .sort((a, b) => a.name.localeCompare(b.name, "vi", { sensitivity: "base" }));
 }
 
 function productImage(product) {
@@ -243,6 +285,40 @@ function buildProductInitialHtml(product, slug) {
 				</div>`;
 }
 
+function buildCollectionProductCard(product) {
+  const slug = productSlug(product);
+  if (!slug) return "";
+
+  const detailUrl = `/products/${encodeURIComponent(slug)}/`;
+  const image = productImage(product);
+  const prices = productPrices(product);
+  const priceLine = prices.length
+    ? prices.length === 1
+      ? formatVnd(prices[0])
+      : `${formatVnd(Math.min(...prices))} - ${formatVnd(Math.max(...prices))}`
+    : "Liên hệ";
+  const variantCount = Array.isArray(product.variants) ? product.variants.length : 0;
+
+  return `
+							<article class="product-card">
+								<a class="product-media" href="${escapeHtml(detailUrl)}" aria-label="Xem chi tiết ${escapeHtml(product.title)}">
+									<img src="${escapeHtml(image)}" alt="${escapeHtml(product.title)}" loading="lazy" referrerpolicy="no-referrer" />
+								</a>
+								<div class="product-body">
+									<div class="product-meta">
+										<span>${escapeHtml(product.brand || "Quà Tặng Tinh Tế")}</span>
+										<span>${escapeHtml(productCategory(product))}</span>
+										<span>${variantCount} lựa chọn</span>
+									</div>
+									<h3><a href="${escapeHtml(detailUrl)}">${escapeHtml(product.title)}</a></h3>
+									<div class="price-line">
+										<span>Giá từ</span>
+										<strong>${escapeHtml(priceLine)}</strong>
+									</div>
+								</div>
+							</article>`;
+}
+
 function writeProductPages(products = []) {
   const templatePath = path.join(outDir, "product.html");
   if (!fs.existsSync(templatePath)) return;
@@ -285,6 +361,83 @@ function writeProductPages(products = []) {
   });
 }
 
+function collectionSchema(group, canonical) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${group.name} - Quà Tặng Tinh Tế`,
+    url: canonical,
+    description: `Bộ sưu tập ${group.name} gồm ${group.products.length} mẫu quà tặng pha lê khắc 3D.`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: group.products
+        .map((product) => ({ product, slug: productSlug(product) }))
+        .filter((entry) => entry.slug)
+        .slice(0, 24)
+        .map((entry, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${siteUrl}/products/${encodeURIComponent(entry.slug)}/`,
+          name: entry.product.title,
+        })),
+    },
+  };
+}
+
+function writeCollectionPages(groups = []) {
+  const templatePath = path.join(outDir, "collection.html");
+  if (!fs.existsSync(templatePath)) return;
+
+  const template = fs.readFileSync(templatePath, "utf8");
+
+  groups.forEach((group) => {
+    const canonical = `${siteUrl}/collections/${encodeURIComponent(group.slug)}/`;
+    const title = `${group.name} - Quà Tặng Tinh Tế`;
+    const description = truncate(
+      `Khám phá ${group.products.length} mẫu ${group.name} trong bộ sưu tập pha lê khắc 3D, có nhiều kích thước và mức giá để chọn quà tặng phù hợp.`,
+      155
+    );
+    const cardsHtml = group.products.map(buildCollectionProductCard).filter(Boolean).join("");
+    const schema = collectionSchema(group, canonical);
+
+    let html = template
+      .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+      .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
+      .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`);
+
+    html = replaceOrInsertMetaProperty(html, "og:title", title);
+    html = replaceOrInsertMetaProperty(html, "og:description", description);
+    html = replaceOrInsertMetaProperty(html, "og:url", canonical);
+    html = replaceOrInsertMetaProperty(html, "og:image", productImage(group.products[0]));
+    html = html.replace(
+      /<script\s+type="application\/ld\+json">\s*[\s\S]*?<\/script>/i,
+      `<script type="application/ld+json">${JSON.stringify(schema)}</script>`
+    );
+    html = html.replace(
+      /<header class="collection-hero">([\s\S]*?)<h1>[\s\S]*?<\/h1>/i,
+      `<header class="collection-hero">$1<h1>${escapeHtml(group.name)}</h1>`
+    );
+    html = html.replace(
+      /<h2 id="collection-title">[\s\S]*?<\/h2>/i,
+      `<h2 id="collection-title">${escapeHtml(group.name)}</h2>`
+    );
+    html = html.replace(
+      /<p id="collection-result-count" class="collection-count">[\s\S]*?<\/p>/i,
+      `<p id="collection-result-count" class="collection-count">${group.products.length} sản phẩm</p>`
+    );
+    html = html.replace(
+      /<div id="collection-product-grid" class="product-grid collection-product-grid" aria-live="polite">\s*<\/div>/i,
+      `<div id="collection-product-grid" class="product-grid collection-product-grid" aria-live="polite" data-prerendered="true" data-category-slug="${escapeHtml(group.slug)}">
+						${cardsHtml}
+					</div>`
+    );
+
+    const targetDir = path.join(outDir, "collections", group.slug);
+    fs.mkdirSync(targetDir, { recursive: true });
+    fs.writeFileSync(path.join(targetDir, "index.html"), html, "utf8");
+  });
+}
+
 function urlEntry(loc, priority = "0.7", changefreq = "weekly") {
   return [
     "  <url>",
@@ -296,7 +449,7 @@ function urlEntry(loc, priority = "0.7", changefreq = "weekly") {
   ].join("\n");
 }
 
-function writeSitemapXml(products = []) {
+function writeSitemapXml(products = [], groups = categoryGroups(products)) {
   const staticUrls = [
     ["/", "1.0", "daily"],
     ["/collection.html", "0.9", "daily"],
@@ -304,12 +457,16 @@ function writeSitemapXml(products = []) {
     ["/contact.html", "0.5", "monthly"],
   ];
 
+  const collectionUrls = groups
+    .filter((group) => group.slug)
+    .map((group) => [`/collections/${encodeURIComponent(group.slug)}/`, "0.85", "daily"]);
+
   const productUrls = products
     .map(productSlug)
     .filter(Boolean)
     .map((slug) => [`/products/${encodeURIComponent(slug)}/`, "0.8", "weekly"]);
 
-  const entries = [...staticUrls, ...productUrls]
+  const entries = [...staticUrls, ...collectionUrls, ...productUrls]
     .map(([loc, priority, changefreq]) => urlEntry(loc, priority, changefreq))
     .join("\n");
 
@@ -362,6 +519,7 @@ function writePleskHtaccess() {
       "  RewriteRule ^products/([^/]+)/?$ product.html [L,QSA]",
       "  RewriteRule ^product/([^/]+)/?$ product.html [L,QSA]",
       "  RewriteRule ^products/?$ collection.html [L,QSA]",
+      "  RewriteRule ^collections/([^/]+)/?$ collection.html [L,QSA]",
       "  RewriteRule ^collection/?$ collection.html [L,QSA]",
       "",
       "  RewriteCond %{REQUEST_FILENAME} !-d",
