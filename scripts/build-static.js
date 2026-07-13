@@ -55,7 +55,7 @@ const collectionGroups = categoryGroups(products);
 writeProductPages(products);
 writeCollectionPages(collectionGroups);
 writeCollectionIndexPage(products);
-writeHomePage(products);
+writeHomePage(products, collectionGroups);
 writePleskHtaccess();
 writeRobotsTxt();
 writeSitemapXml(products, collectionGroups);
@@ -162,12 +162,73 @@ function productCategory(product) {
   return product.category || product.category_name || "Sản phẩm";
 }
 
+function categorySlug(product) {
+  return slugifySegment(product.categorySlug || product.category_slug || productCategory(product));
+}
+
+function collectionPath(slug) {
+  return `/collections/${encodeURIComponent(slug)}/`;
+}
+
+function categoryLinkHtml(product) {
+  const category = productCategory(product);
+  const slug = categorySlug(product);
+  if (!slug) return `<span>${escapeHtml(category)}</span>`;
+
+  return `<a href="${escapeHtml(collectionPath(slug))}" style="color: inherit; text-decoration: none;">${escapeHtml(category)}</a>`;
+}
+
+function breadcrumbSchema(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
+function insertJsonLd(html, id, schema) {
+  const script = `\t\t<script id="${id}" type="application/ld+json">${JSON.stringify(schema)}</script>\n`;
+  const existing = new RegExp(`\\s*<script\\s+id="${id}"[\\s\\S]*?<\\/script>\\s*`, "i");
+  if (existing.test(html)) return html.replace(existing, `\n${script}`);
+  return html.replace(/<\/head>/i, `${script}\t</head>`);
+}
+
+function productBreadcrumbSchema(product, canonical) {
+  const slug = categorySlug(product);
+  const categoryUrl = slug ? `${siteUrl}${collectionPath(slug)}` : `${siteUrl}/collection.html`;
+
+  return breadcrumbSchema([
+    { name: "Trang chủ", url: `${siteUrl}/` },
+    { name: "Bộ sưu tập", url: `${siteUrl}/collection.html` },
+    { name: productCategory(product), url: categoryUrl },
+    { name: product.title, url: canonical },
+  ]);
+}
+
+function collectionBreadcrumbSchema(group, canonical) {
+  const items = [
+    { name: "Trang chủ", url: `${siteUrl}/` },
+    { name: "Bộ sưu tập", url: `${siteUrl}/collection.html` },
+  ];
+
+  if (group) {
+    items.push({ name: group.name, url: canonical });
+  }
+
+  return breadcrumbSchema(items);
+}
+
 function categoryGroups(products = []) {
   const groups = new Map();
 
   products.forEach((product) => {
     const name = productCategory(product);
-    const slug = slugifySegment(product.categorySlug || product.category_slug || name);
+    const slug = categorySlug(product);
     if (!slug) return;
 
     if (!groups.has(slug)) {
@@ -289,6 +350,37 @@ function buildProductInitialHtml(product, slug) {
 				</div>`;
 }
 
+function buildProductBreadcrumbHtml(product) {
+  const category = productCategory(product);
+  const slug = categorySlug(product);
+  const categoryHref = slug ? collectionPath(slug) : "/collection.html";
+
+  return `<nav class="breadcrumb" aria-label="Breadcrumb" style="font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 600; margin-bottom: 24px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+					<a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-house" style="font-size: 0.8rem;"></i> Trang chủ</a>
+					<span>/</span>
+					<a href="/collection.html" style="text-decoration: none; color: inherit;">Sản phẩm</a>
+					<span>/</span>
+					<span id="breadcrumb-category" style="color: inherit; display: flex; align-items: center; gap: 8px;"><a href="${escapeHtml(categoryHref)}" style="text-decoration: none; color: inherit;">${escapeHtml(category)}</a> <span>/</span> <span style="color: var(--brand-700); font-weight: 700;">${escapeHtml(product.title)}</span></span>
+				</nav>`;
+}
+
+function buildCollectionBreadcrumbHtml(group) {
+  const current = group
+    ? `<a href="/collection.html" style="text-decoration: none; color: inherit;">Bộ sưu tập</a>
+					<span>/</span>
+					<span style="color: var(--brand-700); font-weight: 700;">${escapeHtml(group.name)}</span>`
+    : `<span style="color: var(--brand-700); font-weight: 700;">Bộ sưu tập</span>`;
+
+  return `<nav class="breadcrumb" aria-label="Breadcrumb" style="font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 600; margin-bottom: 24px; color: #64748b; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+					<a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+						<i class="fa-solid fa-house" aria-hidden="true" style="font-size: 0.8rem;"></i>
+						Trang chủ
+					</a>
+					<span>/</span>
+					${current}
+				</nav>`;
+}
+
 function buildCollectionProductCard(product) {
   const slug = productSlug(product);
   if (!slug) return "";
@@ -311,7 +403,7 @@ function buildCollectionProductCard(product) {
 								<div class="product-body">
 									<div class="product-meta">
 										<span>${escapeHtml(product.brand || "Quà Tặng Tinh Tế")}</span>
-										<span>${escapeHtml(productCategory(product))}</span>
+										${categoryLinkHtml(product)}
 										<span>${variantCount} lựa chọn</span>
 									</div>
 									<h3><a href="${escapeHtml(detailUrl)}">${escapeHtml(product.title)}</a></h3>
@@ -345,7 +437,7 @@ function buildHomeProductCard(product) {
 										<div class="product-body">
 											<div class="product-meta">
 												<span>${escapeHtml(product.brand || "Quà Tặng Tinh Tế")}</span>
-												<span>${escapeHtml(productCategory(product))}</span>
+												${categoryLinkHtml(product)}
 												<span>${variantCount} lựa chọn</span>
 											</div>
 											<h3><a href="${escapeHtml(detailUrl)}">${escapeHtml(product.title)}</a></h3>
@@ -380,6 +472,7 @@ function writeProductPages(products = []) {
     const description = product.metaDescription || truncate(product.description || product.title);
     const image = productImage(product);
     const schema = productSchema(product, slug, canonical);
+    const breadcrumb = productBreadcrumbSchema(product, canonical);
     let html = template
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
       .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
@@ -391,16 +484,18 @@ function writeProductPages(products = []) {
     html = replaceOrInsertMetaProperty(html, "og:url", canonical);
     html = html.replace(
       /<span id="breadcrumb-category"([^>]*)>[\s\S]*?<\/span>/i,
-      `<span id="breadcrumb-category"$1>${escapeHtml(product.category || "Sản phẩm")} / ${escapeHtml(product.title)}</span>`
+      `<span id="breadcrumb-category"$1>${categoryLinkHtml(product)} / ${escapeHtml(product.title)}</span>`
+    );
+    html = html.replace(
+      /<nav class="breadcrumb"[\s\S]*?<\/nav>/i,
+      buildProductBreadcrumbHtml(product)
     );
     html = html.replace(
       /<div id="product-container" class="product-detail" aria-live="polite">\s*<div class="empty-state">Đang tải chi tiết sản phẩm\.\.\.<\/div>\s*<\/div>/i,
       buildProductInitialHtml(product, slug)
     );
-    html = html.replace(
-      /<\/head>/i,
-      `\t\t<script id="static-product-schema" type="application/ld+json">${JSON.stringify(schema)}</script>\n\t</head>`
-    );
+    html = insertJsonLd(html, "static-product-schema", schema);
+    html = insertJsonLd(html, "static-product-breadcrumb-schema", breadcrumb);
 
     const targetDir = path.join(outDir, "products", slug);
     fs.mkdirSync(targetDir, { recursive: true });
@@ -463,6 +558,7 @@ function writeCollectionPages(groups = []) {
     );
     const cardsHtml = group.products.map(buildCollectionProductCard).filter(Boolean).join("");
     const schema = collectionSchema(group, canonical);
+    const breadcrumb = collectionBreadcrumbSchema(group, canonical);
 
     let html = template
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
@@ -476,6 +572,11 @@ function writeCollectionPages(groups = []) {
     html = html.replace(
       /<script\s+type="application\/ld\+json">\s*[\s\S]*?<\/script>/i,
       `<script type="application/ld+json">${JSON.stringify(schema)}</script>`
+    );
+    html = insertJsonLd(html, "static-collection-breadcrumb-schema", breadcrumb);
+    html = html.replace(
+      /<nav class="breadcrumb"[\s\S]*?<\/nav>/i,
+      buildCollectionBreadcrumbHtml(group)
     );
     html = html.replace(
       /<header class="collection-hero">([\s\S]*?)<h1>[\s\S]*?<\/h1>/i,
@@ -521,6 +622,7 @@ function writeCollectionIndexPage(products = []) {
     },
     canonical
   );
+  const breadcrumb = collectionBreadcrumbSchema(null, canonical);
   const cardsHtml = visibleProducts.map(buildCollectionProductCard).filter(Boolean).join("");
 
   let html = fs.readFileSync(templatePath, "utf8")
@@ -535,6 +637,11 @@ function writeCollectionIndexPage(products = []) {
   html = html.replace(
     /<script\s+type="application\/ld\+json">\s*[\s\S]*?<\/script>/i,
     `<script type="application/ld+json">${JSON.stringify(schema)}</script>`
+  );
+  html = insertJsonLd(html, "static-collection-breadcrumb-schema", breadcrumb);
+  html = html.replace(
+    /<nav class="breadcrumb"[\s\S]*?<\/nav>/i,
+    buildCollectionBreadcrumbHtml(null)
   );
   html = html.replace(
     /<h2 id="collection-title">[\s\S]*?<\/h2>/i,
@@ -554,7 +661,22 @@ function writeCollectionIndexPage(products = []) {
   fs.writeFileSync(templatePath, html, "utf8");
 }
 
-function writeHomePage(products = []) {
+function buildHomeCategoryMenu(groups = []) {
+  const allLink = `
+								<a class="filter-option" href="/collection.html" role="option" aria-selected="true" data-category="Tất cả">
+									<span>Tất cả</span>
+									<i class="fa-solid fa-check" aria-hidden="true"></i>
+								</a>`;
+  const categoryLinks = groups.map((group) => `
+								<a class="filter-option" href="${escapeHtml(collectionPath(group.slug))}" role="option" aria-selected="false" data-category="${escapeHtml(group.name)}">
+									<span>${escapeHtml(group.name)}</span>
+									<i class="fa-solid fa-check" aria-hidden="true"></i>
+								</a>`).join("");
+
+  return `${allLink}${categoryLinks}`;
+}
+
+function writeHomePage(products = [], groups = []) {
   const templatePath = path.join(outDir, "index.html");
   if (!fs.existsSync(templatePath)) return;
 
@@ -576,6 +698,11 @@ function writeHomePage(products = []) {
   html = html.replace(
     /<span id="recommended-products-count" class="collection-count"\s*>[\s\S]*?<\/span\s*>/i,
     `<span id="recommended-products-count" class="collection-count">${recommendedProducts.length} mẫu</span>`
+  );
+  html = html.replace(
+    /(<div\s+id="category-filter-menu"[\s\S]*?>)\s*<\/div>/i,
+    `$1${buildHomeCategoryMenu(groups)}
+							</div>`
   );
   html = html.replace(
     /<div\s+id="new-product-grid"\s+class="product-grid product-grid-compact"\s*>\s*<\/div>/i,
@@ -626,7 +753,7 @@ function writeSitemapXml(products = [], groups = categoryGroups(products)) {
 
   const collectionUrls = groups
     .filter((group) => group.slug)
-    .map((group) => [`/collections/${encodeURIComponent(group.slug)}/`, "0.85", "daily"]);
+    .map((group) => [collectionPath(group.slug), "0.85", "daily"]);
 
   const productUrls = products
     .map(productSlug)

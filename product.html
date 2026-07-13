@@ -913,6 +913,7 @@
 
 			function injectProductSchema(productItem) {
 				document.getElementById("product-schema-db")?.remove();
+				document.getElementById("static-product-schema")?.remove();
 				const prices = productItem.variants.map((variant) => variant.price).filter(Boolean);
 				const script = document.createElement("script");
 				script.id = "product-schema-db";
@@ -1022,7 +1023,11 @@
 
 				const bcCategory = document.getElementById("breadcrumb-category");
 				if (bcCategory) {
-					bcCategory.innerHTML = `<a href="collection.html?category=${encodeURIComponent(product.category)}" style="text-decoration: none; color: inherit;">${product.category}</a> <span>/</span> <span style="color: var(--brand-700); font-weight: 700;">${displayTitle}</span>`;
+					const categoryHref = StaticStorefront.collectionUrl({
+						name: product.category,
+						slug: product.categorySlug,
+					});
+					bcCategory.innerHTML = `<a href="${categoryHref}" style="text-decoration: none; color: inherit;">${product.category}</a> <span>/</span> <span style="color: var(--brand-700); font-weight: 700;">${displayTitle}</span>`;
 				}
 
 				const hasComparePrice = variant.compare_at_price && variant.compare_at_price > variant.price;

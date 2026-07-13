@@ -996,9 +996,12 @@ button {
   padding: 0.72rem 0.8rem;
   color: var(--brand-900);
   background: transparent;
+  font-family: inherit;
   font-size: 0.83rem;
   font-weight: 800;
+  text-decoration: none;
   text-align: left;
+  cursor: pointer;
 }
 
 .filter-option i {
