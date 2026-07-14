@@ -136,22 +136,49 @@
     }
   }
 
+  function textValue(value, fallback = "") {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "string") {
+      const text = value.trim();
+      return text || fallback;
+    }
+    if (typeof value === "number" || typeof value === "boolean") {
+      return String(value);
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const text = textValue(item, "");
+        if (text) return text;
+      }
+      return fallback;
+    }
+    if (typeof value === "object") {
+      for (const key of ["vi", "en", "name", "title", "label", "value"]) {
+        const text = textValue(value[key], "");
+        if (text) return text;
+      }
+      return fallback;
+    }
+    return fallback;
+  }
+
   function imageUrl(row) {
     if (Array.isArray(row.images) && row.images[0]) return row.images[0];
     return row.image_url || row.hover_image_url || row.imageUrl || FALLBACK_IMAGE;
   }
 
   function variantTitle(variant, product) {
-    const size = variant.size || variant.attribute_values?.size || "";
-    const material = variant.material || variant.attribute_values?.material || product.material || "";
-    return [size, material].filter(Boolean).join(" / ") || "Mặc định";
+    const options = variant.option_values || variant.attribute_values || {};
+    const size = textValue(variant.size || options.size, "");
+    const material = textValue(variant.material || options.material || product.material, "");
+    return [size, material].filter(Boolean).join(" / ") || "M\u1eb7c \u0111\u1ecbnh";
   }
 
   function normalizeVariant(variant, product) {
     const images = Array.isArray(variant.images) ? variant.images : [];
     return {
       id: Number(variant.id || 0),
-      title: variant.title || variantTitle(variant, product),
+      title: textValue(variant.title || variant.name, variantTitle(variant, product)),
       sku: variant.sku || product.sku || `SP-${product.id}`,
       price: Number(variant.price || product.price || product.base_price || 0),
       compare_at_price: Number(variant.compare_at_price || 0),
@@ -161,11 +188,19 @@
   }
 
   function normalizeProduct(row) {
+    const title = textValue(row.name || row.title, "S\u1ea3n ph\u1ea9m");
+    const brand = textValue(row.brand_name || row.brand?.name || row.brand, "Qu\u00e0 T\u1eb7ng Tinh T\u1ebf");
+    const category = textValue(row.category_name || row.category?.name || row.category, "S\u1ea3n ph\u1ea9m");
+    const categorySlug = row.category_slug || row.category?.slug || "";
+    const material = textValue(row.material, "");
+    const printDetail = textValue(row.print_detail, "");
+    const style = textValue(row.style, "");
+    const careInstructions = textValue(row.care_instructions, "");
     const variants = Array.isArray(row.variants) && row.variants.length
       ? row.variants.map((variant) => normalizeVariant(variant, row))
       : [{
           id: 0,
-          title: row.material || "Mặc định",
+          title: material || "M\u1eb7c \u0111\u1ecbnh",
           sku: row.sku || `SP-${row.id}`,
           price: Number(row.price || row.base_price || 0),
           compare_at_price: Number(row.compare_at_price || 0),
@@ -174,25 +209,25 @@
         }];
 
     const description = [
-      row.description,
-      row.material ? `Chất liệu: ${row.material}` : "",
-      row.print_detail ? `Chi tiết: ${row.print_detail}` : "",
-      row.style ? `Kiểu dáng: ${row.style}` : "",
-      row.care_instructions ? `Bảo quản: ${row.care_instructions}` : "",
+      textValue(row.description || row.short_description, ""),
+      material ? `Ch\u1ea5t li\u1ec7u: ${material}` : "",
+      printDetail ? `Chi ti\u1ebft: ${printDetail}` : "",
+      style ? `Ki\u1ec3u d\u00e1ng: ${style}` : "",
+      careInstructions ? `B\u1ea3o qu\u1ea3n: ${careInstructions}` : "",
     ].filter(Boolean).join("<br>");
 
     return {
       id: Number(row.id),
       slug: row.slug || "",
       sourceUrl: row.sourceUrl || row.source_url || "",
-      title: row.name || row.title || "Sản phẩm",
-      brand: row.brand || "Quà Tặng Tinh Tế",
-      category: row.category_name || row.category || "Sản phẩm",
-      categorySlug: row.category_slug || "",
+      title,
+      brand,
+      category,
+      categorySlug,
       imageUrl: imageUrl(row),
-      metaTitle: row.meta_title || row.name || row.title || "Sản phẩm",
-      metaDescription: row.meta_description || String(description || row.name || "Sản phẩm quà tặng").replace(/<[^>]+>/g, " "),
-      metaKeywords: row.meta_keywords || "",
+      metaTitle: textValue(row.meta_title, title),
+      metaDescription: textValue(row.meta_description, String(description || title || "S\u1ea3n ph\u1ea9m qu\u00e0 t\u1eb7ng").replace(/<[^>]+>/g, " ")),
+      metaKeywords: textValue(row.meta_keywords, ""),
       description,
       variants,
       video_url: row.video_url || "",
@@ -232,7 +267,7 @@
   }
 
   function slugifySegment(value) {
-    return String(value || "")
+    return textValue(value, "")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/đ/g, "d")
@@ -243,7 +278,7 @@
   }
 
   function collectionUrl(category) {
-    const name = category?.name || category?.title || String(category || "");
+    const name = textValue(category?.name || category?.title || category, "");
     const slug = category?.slug || category?.category_slug || slugifySegment(name);
     const prefix = resolveProjectPrefix();
 
@@ -253,7 +288,7 @@
   }
 
   function escapeHtml(value) {
-    return String(value ?? "")
+    return textValue(value, "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -2942,6 +2977,8 @@
     loadProducts,
     loadProductById,
     loadProductBySlug,
+    normalizeProduct,
+    textValue,
     mountAdminLoginButton,
     openQuickProductEditor,
     collectionUrl,

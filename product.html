@@ -1575,7 +1575,7 @@
 				try {
 					const response = await StaticStorefront.fetchJson(`/api/products/${product.id}/related`);
 					const related = Array.isArray(response) ? response : (response.data || []);
-					renderRelatedProducts(related);
+					renderRelatedProducts(related.map(StaticStorefront.normalizeProduct));
 				} catch (err) {
 					console.error("Failed to load related products:", err);
 				}
@@ -1598,8 +1598,8 @@
 									<img src="${item.images?.[0] || item.imageUrl || 'public/images/slider_1.png'}" style="width: 100%; height: 100%; object-fit: contain; padding: 12px;" />
 								</div>
 								<div style="padding: 16px;">
-									<h4 style="margin: 0 0 6px; font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || item.title}</h4>
-									<p style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--brand-900);">${formatVND(item.price || item.base_price)}</p>
+									<h4 style="margin: 0 0 6px; font-size: 0.88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</h4>
+									<p style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--brand-900);">${formatVND(item.variants?.[0]?.price || item.price || item.base_price)}</p>
 								</div>
 							</a>
 						`).join('')}
